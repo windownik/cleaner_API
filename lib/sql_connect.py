@@ -3,7 +3,7 @@ import os
 from hashlib import sha256
 
 from fastapi_asyncpg import configure_asyncpg
-from app_init import app
+from lib.app_init import app
 from fastapi import Depends
 
 
@@ -15,7 +15,7 @@ db_name = os.environ.get("DATABASE_NAME")
 password = 102015 if password is None else password
 host = '127.0.0.1' if host is None else host
 port = 5432 if port is None else port
-db_name = 'svd_api' if db_name is None else db_name
+db_name = 'cleaner_api' if db_name is None else db_name
 
 
 # Создаем новую таблицу
@@ -28,8 +28,15 @@ async def create_all_users_table(db):
  phone BIGINT UNIQUE DEFAULT 0,
  email TEXT DEFAULT '0',
  name TEXT DEFAULT '0',
- surname TEXT DEFAULT '0',
+ auth_type TEXT DEFAULT '0',
+ auth_id BIGINT DEFAULT 0,
+ description TEXT DEFAULT '0',
+ lang TEXT DEFAULT 'en',
+ city TEXT DEFAULT '0',
+ street TEXT DEFAULT '0',
+ house TEXT DEFAULT '0',
  status TEXT DEFAULT '0',
+ range BIGINT DEFAULT 0,
  password_hash TEXT DEFAULT 'active',
  last_active timestamp,
  create_date timestamp)''')
