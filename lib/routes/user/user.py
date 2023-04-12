@@ -25,16 +25,18 @@ async def initialization(connect):
 
 @app.post(path='/user', tags=['User'], responses=create_user_res)
 async def new_user(name: str, phone: int, email: str, auth_type: str, auth_id: int, description: str, lang: str,
-                   city: str, street: str, house: str, latitudes: str, longitudes: str,
-                   access_token: str, db=Depends(data_b.connection)):
+                   city: str, street: str, house: str, latitudes: float, longitudes: float, status: str,
+                   image_link: str, access_token: str, db=Depends(data_b.connection)):
     """Create new user in server.
     name: users name from Facebook or name of company\n
     phone: only numbers\n
     email: get from facebook API\n
+    image_link: get from facebook API\n
     auth_type: at start version can be: fb, google, twit\n
     auth_id: users id in Facebook\n
     description: users account description\n
-    lang: users app Language\n\n
+    status: can be customer and worker\n
+    lang: users app Language can be: ru, en, heb\n\n
     Personal home/work address\n
     city: home/work city\n
     street: home/work street\n
@@ -42,11 +44,22 @@ async def new_user(name: str, phone: int, email: str, auth_type: str, auth_id: i
     latitudes: (Широта) of home/work address\n
     longitudes: (Долгота) of home/work address\n
     access_token: Facebook access token"""
+
+    if status != 'customer' and status != 'worker':
+        return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
+                            content={"ok": False,
+                                     'description': 'Bad users status', })
+    if lang != 'ru' and lang != 'en' and lang != 'heb':
+        return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
+                            content={"ok": False,
+                                     'description': 'Bad pick language', })
+
     user_data = {
         'user_id': 0,
         'name': name,
         'phone': phone,
         'email': email,
+        'image_link': image_link,
         'auth_type': auth_type,
         'auth_id': auth_id,
         'description': description,
@@ -54,7 +67,10 @@ async def new_user(name: str, phone: int, email: str, auth_type: str, auth_id: i
         'city': city,
         'street': street,
         'house': house,
-        'status': 'customer',
+        'status': status,
+        'score': 5,
+        'score_count': 0,
+        'total_score': 0,
         'range': 500,
         'latitudes': float(latitudes),
         'longitudes': float(longitudes),
@@ -93,27 +109,62 @@ async def get_user_information(access_token: str, db=Depends(data_b.connection),
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
     user_data = await conn.read_data(db=db, name='*', table='all_users',
-                                id_name='user_id', id_data=user_id[0][0])
+                                     id_name='user_id', id_data=user_id[0][0])
     if not user_data:
         return Response(content="no user in database",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
     user = User(user_data[0])
     return JSONResponse(content={"ok": True,
-            'user': user.get_user_json(),
-            })
+                                 'user': user.get_user_json(),
+                                 })
 
 
 @app.put(path='/user', tags=['User'], responses=update_user_res)
-async def update_user_information(name: str, surname: str, email: str, access_token: str, status: str,
+async def update_user_information(name: str, phone: int, email: str, description: str, lang: str, city: str,
+                                  street: str, house: str, latitudes: float, longitudes: float, status: str, range: int,
+                                  access_token: str,
                                   db=Depends(data_b.connection)):
-    """Update new user in auth server, email is optional. If there is no email then send 0.
+    """Update user's information.
 
-    status can be: simple, creator, admin"""
+    name: users name from Facebook or name of company\n
+    phone: only numbers\n
+    email: get from facebook API\n
+    description: users account description\n
+    status: can be customer and worker\n
+    lang: users app Language can be: ru, en, heb\n\n
+    range: search range in meters
+    Personal home/work address\n
+    city: home/work city\n
+    street: home/work street\n
+    house: home/work house number can include / or letters\n
+    latitudes: (Широта) of home/work address\n
+    longitudes: (Долгота) of home/work address\n"""
+
+    if status != 'customer' and status != 'worker':
+        return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
+                            content={"ok": False,
+                                     'description': 'Bad users status', })
+    if lang != 'ru' and lang != 'en' and lang != 'heb':
+        return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
+                            content={"ok": False,
+                                     'description': 'Bad pick language', })
+
     user_id = await conn.get_token(db=db, token_type='access', token=access_token)
     if not user_id:
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
-    await conn.update_user(db=db, email=email, status=status, name=name, surname=surname, user_id=user_id[0][0])
+    await conn.update_user(db=db, name=name, phone=phone, email=email, description=description, lang=lang, city=city,
+                           street=street, house=house, latitudes=latitudes, longitudes=longitudes,
+                           status=status, range=range, user_id=user_id[0][0])
     return {"ok": True,
             'desc': 'all users information updated'}
+
+
+@app.post(path='/user', tags=['User'], responses=update_user_res)
+async def update_user_profession(work_list: str, access_token: str, db=Depends(data_b.connection)):
+    """Update user's profession information."""
+    user_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not user_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)

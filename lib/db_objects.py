@@ -52,6 +52,7 @@ class User:
     name: str = '0'
     phone: int = 0
     email: str = '0'
+    image_link: str = '0'
     auth_type: str = '0'
     auth_id: int = 0
     description: str = '0'
@@ -59,6 +60,9 @@ class User:
     range: int = 1
     address: Address = None
     status: str = '0'
+    score: int = 5
+    total_score: int = 0
+    score_count: int = 0
     last_active: datetime.datetime = None
     create_date: datetime.datetime = None
 
@@ -67,6 +71,7 @@ class User:
             self.user_id = data['user_id']
             self.phone = data['phone']
             self.email = data['email']
+            self.image_link = data['image_link']
             self.name = data['name']
             self.auth_type = data['auth_type']
             self.auth_id = data['auth_id']
@@ -75,6 +80,9 @@ class User:
             self.address = Address(data)
             self.status = data['status']
             self.range = data['range']
+            self.score = data['score']
+            self.score_count = data['score_count']
+            self.total_score = data['total_score']
             self.last_active = data['last_active'] if data['last_active'] != None else None
             self.create_date = data['create_date'] if data['create_date'] != None else None
 
@@ -83,12 +91,16 @@ class User:
             'user_id': self.user_id,
             'phone': self.phone,
             'email': self.email,
+            'image_link': self.image_link,
             'name': self.name,
             'auth_type': self.auth_type,
             'auth_id': self.auth_id,
             'description': self.description,
             'lang': self.lang,
             'status': self.status,
+            'score': self.score,
+            'score_count': self.score_count,
+            'total_score': self.total_score,
             'address': self.address.get_address_json(),
             'last_active': str(self.last_active),
             'create_date': str(self.create_date)
@@ -96,6 +108,7 @@ class User:
 
     async def create_user(self, db: Depends):
         self.user_id = (await create_user(db=db, phone=self.phone, email=self.email, name=self.name,
-                                         auth_type=self.auth_type, auth_id=self.auth_id, description=self.description,
-                                         lang=self.lang, city=self.address.city, street=self.address.street,
-                                         house=self.address.house, status=self.status))[0][0]
+                                          auth_type=self.auth_type, auth_id=self.auth_id, description=self.description,
+                                          lang=self.lang, city=self.address.city, street=self.address.street,
+                                          house=self.address.house, status=self.status, image_link=self.image_link,
+                                          latitudes=self.address.latitudes, longitudes=self.address.latitudes))[0][0]

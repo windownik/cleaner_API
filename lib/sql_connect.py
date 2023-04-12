@@ -28,6 +28,7 @@ async def create_all_users_table(db):
  phone BIGINT UNIQUE DEFAULT 0,
  email TEXT DEFAULT '0',
  name TEXT DEFAULT '0',
+ image_link TEXT DEFAULT '0',
  auth_type TEXT DEFAULT '0',
  auth_id BIGINT DEFAULT 0,
  description TEXT DEFAULT '0',
@@ -35,6 +36,9 @@ async def create_all_users_table(db):
  city TEXT DEFAULT '0',
  street TEXT DEFAULT '0',
  house TEXT DEFAULT '0',
+ score BIGINT DEFAULT 5,
+ score_count BIGINT DEFAULT 0,
+ total_score BIGINT DEFAULT 0,
  status TEXT DEFAULT 'worker',
  range BIGINT DEFAULT 500,
  longitudes DOUBLE PRECISION,
@@ -77,13 +81,14 @@ async def create_work_type_table(db):
 
 # Создаем новую таблицу
 async def create_user(db: Depends, phone, email, name, auth_type, auth_id, description, lang, city, street, house,
-                      status):
+                      status, longitudes, latitudes, image_link: str):
     now = datetime.datetime.now()
     user_id = await db.fetch(f"INSERT INTO all_users (phone, email, name, auth_type, auth_id, description, lang, "
-                             f"city, street, house, status, last_active, create_date) "
-                             f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) "
+                             f"city, street, house, status, longitudes, latitudes, image_link, last_active, create_date) "
+                             f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) "
                              f"ON CONFLICT DO NOTHING RETURNING user_id;", phone, email, name, auth_type, auth_id,
-                             description, lang, city, street, house, status, now, now)
+                             description, lang, city, street, house, status, longitudes, latitudes, image_link, now,
+                             now)
     return user_id
 
 
@@ -128,9 +133,13 @@ async def get_token(db: Depends, token_type: str, token: str):
 
 
 # Создаем новую таблицу
-async def update_user(db: Depends, email: str, name: str, surname: str, status: str, user_id: int):
-    user_id = await db.fetch(f"UPDATE all_users SET email=$1, name=$2, surname=$3, status=$4 WHERE id=$5;",
-                             email, name, surname, status, user_id)
+async def update_user(db: Depends, name: str, phone: int, email: str,  description: str, lang: str, city: str, house: str,
+                      street: str,  latitudes: float, longitudes: float, status: str, range: int, user_id: int):
+    user_id = await db.fetch(f"UPDATE all_users SET name=$1, phone=$2, email=$3, description=$4, lang=$5, city=$6, "
+                             f"street=$7, house=$8, latitudes=$9, longitudes=$10, status=$11, range=$12 WHERE "
+                             f"user_id=$13;",
+                             name, phone, email, description, lang, city, street, house, latitudes, longitudes,
+                             status, range, user_id)
     return user_id
 
 

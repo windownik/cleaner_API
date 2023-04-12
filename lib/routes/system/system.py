@@ -24,6 +24,8 @@ async def init_database(db=Depends(data_b.connection)):
     """Here you can check your username and password"""
     await conn.create_all_users_table(db)
     await conn.create_token_table(db)
+    await conn.create_work_table(db)
+    await conn.create_work_type_table(db)
     return {"ok": True}
 
 
