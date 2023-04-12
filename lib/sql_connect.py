@@ -24,7 +24,7 @@ data_b = configure_asyncpg(app, f'postgres://postgres:{password}@{host}:{port}/{
 
 async def create_all_users_table(db):
     await db.execute(f'''CREATE TABLE IF NOT EXISTS all_users (
- id SERIAL PRIMARY KEY,
+ user_id SERIAL PRIMARY KEY,
  phone BIGINT UNIQUE DEFAULT 0,
  email TEXT DEFAULT '0',
  name TEXT DEFAULT '0',
@@ -35,9 +35,10 @@ async def create_all_users_table(db):
  city TEXT DEFAULT '0',
  street TEXT DEFAULT '0',
  house TEXT DEFAULT '0',
- status TEXT DEFAULT '0',
- range BIGINT DEFAULT 0,
- password_hash TEXT DEFAULT 'active',
+ status TEXT DEFAULT 'worker',
+ range BIGINT DEFAULT 500,
+ longitudes DOUBLE PRECISION,
+ latitudes DOUBLE PRECISION, 
  last_active timestamp,
  create_date timestamp)''')
 
@@ -56,14 +57,33 @@ async def create_token_table(db):
 
 
 # Создаем новую таблицу
-async def create_user(db: Depends, phone, email, name, surname, status, password_hash):
-    last_active = datetime.datetime.now()
-    user_id = await db.fetch(f"INSERT INTO all_users (phone, email, name, surname, status, password_hash, last_active, "
-                             f"create_date) "
-                             f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) "
-                             f"ON CONFLICT DO NOTHING RETURNING id;", phone, email, name, surname, status,
-                             password_hash,
-                             last_active, last_active)
+async def create_work_table(db):
+    await db.execute(f'''CREATE TABLE IF NOT EXISTS work (
+ id SERIAL PRIMARY KEY,
+ user_id BIGINT DEFAULT 0,
+ work_type TEXT DEFAULT 'clean',
+ object_id INTEGER DEFAULT 0,
+ object_size INTEGER DEFAULT 0
+ )''')
+
+
+# Создаем новую таблицу
+async def create_work_type_table(db):
+    await db.execute(f'''CREATE TABLE IF NOT EXISTS object_type (
+ id SERIAL PRIMARY KEY,
+ object_name TEXT DEFAULT 'room'
+ )''')
+
+
+# Создаем новую таблицу
+async def create_user(db: Depends, phone, email, name, auth_type, auth_id, description, lang, city, street, house,
+                      status):
+    now = datetime.datetime.now()
+    user_id = await db.fetch(f"INSERT INTO all_users (phone, email, name, auth_type, auth_id, description, lang, "
+                             f"city, street, house, status, last_active, create_date) "
+                             f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) "
+                             f"ON CONFLICT DO NOTHING RETURNING user_id;", phone, email, name, auth_type, auth_id,
+                             description, lang, city, street, house, status, now, now)
     return user_id
 
 
