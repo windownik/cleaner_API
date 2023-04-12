@@ -97,7 +97,8 @@ async def new_user(name: str, phone: int, email: str, auth_type: str, auth_id: i
                                  'user_id': user.user_id,
                                  'access_token': access[0][0],
                                  'refresh_token': refresh[0][0]},
-                        status_code=_status.HTTP_200_OK)
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
 
 
 @app.get(path='/user', tags=['User'], responses=get_me_res)
@@ -116,7 +117,9 @@ async def get_user_information(access_token: str, db=Depends(data_b.connection),
     user = User(user_data[0])
     return JSONResponse(content={"ok": True,
                                  'user': user.get_user_json(),
-                                 })
+                                 },
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
 
 
 @app.put(path='/user', tags=['User'], responses=update_user_res)
@@ -151,20 +154,24 @@ async def update_user_information(name: str, phone: int, email: str, description
 
     user_id = await conn.get_token(db=db, token_type='access', token=access_token)
     if not user_id:
-        return Response(content="bad access token",
-                        status_code=_status.HTTP_401_UNAUTHORIZED)
+        return JSONResponse(content={"ok": False,
+                                     'description': "bad access token"},
+                            status_code=_status.HTTP_401_UNAUTHORIZED)
 
     await conn.update_user(db=db, name=name, phone=phone, email=email, description=description, lang=lang, city=city,
                            street=street, house=house, latitudes=latitudes, longitudes=longitudes,
                            status=status, range=range, user_id=user_id[0][0])
-    return {"ok": True,
-            'desc': 'all users information updated'}
+    return JSONResponse(content={"ok": True,
+                                 'desc': 'all users information updated'},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'}
+                        )
 
 
-@app.post(path='/user', tags=['User'], responses=update_user_res)
+@app.post(path='/user_profession', tags=['User'], responses=update_user_res)
 async def update_user_profession(work_list: str, access_token: str, db=Depends(data_b.connection)):
     """Update user's profession information."""
     user_id = await conn.get_token(db=db, token_type='access', token=access_token)
     if not user_id:
-        return Response(content="bad access token",
-                        status_code=_status.HTTP_401_UNAUTHORIZED)
+        return JSONResponse(content="bad access token",
+                            status_code=_status.HTTP_401_UNAUTHORIZED)

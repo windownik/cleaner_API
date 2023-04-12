@@ -75,7 +75,28 @@ async def create_work_table(db):
 async def create_work_type_table(db):
     await db.execute(f'''CREATE TABLE IF NOT EXISTS object_type (
  id SERIAL PRIMARY KEY,
- object_name TEXT DEFAULT 'room'
+ name_ru TEXT DEFAULT 'room',
+ name_en TEXT DEFAULT 'room',
+ name_heb TEXT DEFAULT 'room'
+ )''')
+    object_types = ((1, 'Квартира', 'Apartment', 'דִירָה'), (2, 'Дом', 'House', 'בַּיִת'),
+                    (3, 'Офис', 'Office', 'מִשׂרָד'), (4, 'Легковой автомобиль', 'Car', 'מכונית'))
+    for i in object_types:
+        await db.execute(f"INSERT INTO object_type (id, name_ru, name_en, name_heb) "
+                         f"VALUES ($1, $2, $3, $4) "
+                         f"ON CONFLICT DO NOTHING;", i[0], i[1], i[2], i[3])
+
+
+# Создаем новую таблицу
+# Таблица для записи статей затрат в одном счете
+async def create_files_table(db):
+    await db.execute(f'''CREATE TABLE IF NOT EXISTS files (
+ id SERIAL PRIMARY KEY,
+ file_name TEXT DEFAULT '0',
+ file_path TEXT DEFAULT '0',
+ file_type TEXT DEFAULT '0',
+ owner_id INTEGER DEFAULT 0,
+ create_date timestamp
  )''')
 
 
@@ -106,6 +127,15 @@ async def create_token(db: Depends, user_id, token_type):
                            f"ON CONFLICT DO NOTHING RETURNING token;", user_id, token, token_type,
                            create_date, death_date)
     return token
+
+
+# Создаем новую запись в базе данных
+async def save_new_file(db: Depends, file_name: str, file_path: str, file_type: str, owner_id: int):
+    now = datetime.datetime.now()
+    file_id = await db.fetch(f"INSERT INTO files (file_name, file_path, file_type, owner_id, create_date) "
+                             f"VALUES ($1, $2, $3, $4, $5) "
+                             f"ON CONFLICT DO NOTHING RETURNING id;", file_name, file_path, file_type, owner_id, now)
+    return file_id
 
 
 # Создаем новую таблицу
@@ -141,6 +171,12 @@ async def update_user(db: Depends, name: str, phone: int, email: str,  descripti
                              name, phone, email, description, lang, city, street, house, latitudes, longitudes,
                              status, range, user_id)
     return user_id
+
+
+# Обновляем информацию
+async def update_data(db: Depends, table: str, name: str, id_data, data, id_name: str = 'id'):
+    await db.execute(f"UPDATE {table} SET {name}=$1 WHERE {id_name}=$2;",
+                     data, id_data)
 
 
 # Обновляем информацию

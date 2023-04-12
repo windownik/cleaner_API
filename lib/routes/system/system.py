@@ -26,6 +26,7 @@ async def init_database(db=Depends(data_b.connection)):
     await conn.create_token_table(db)
     await conn.create_work_table(db)
     await conn.create_work_type_table(db)
+    await conn.create_files_table(db)
     return {"ok": True}
 
 

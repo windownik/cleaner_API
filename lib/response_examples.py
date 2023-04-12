@@ -190,3 +190,51 @@ update_pass_res = {
         }
     },
 }
+
+upload_files_res = {
+    200: {
+        "description": "Success",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "odd": {
+                        "summary": "Success",
+                        "value":
+                            {'ok': True,
+                             'creator_id': 3,
+                             'file_name': '12.jpg',
+                             'file_type': 'image',
+                             'file_id': 12,
+                             'url': f"http://127.0.0.1:80/file_download?file_id=12"}
+                    }
+                },
+            }
+        }
+    }
+}
+
+upload_files_list_res = {
+    200: {
+        "description": "Success",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "odd": {
+                        "summary": "Success",
+                        "value":
+                            {'ok': True,
+                             'desc': "all file list by file line",
+                             'files': [{
+                'file_id': 22,
+                'name': '12.jpg',
+                'file_type': 'image',
+                'owner_id': 12,
+                'create_date': '2023-01-17 21:54:23.738397',
+                'url': f"http://127.0.0.1:80/file_download?file_id=12"
+            }]}
+                    }
+                },
+            }
+        }
+    }
+}

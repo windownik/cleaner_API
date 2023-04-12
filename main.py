@@ -23,7 +23,8 @@ def custom_openapi():
         routes=app.routes,
         tags=[{'name': 'System', 'description': "Checking login and password, as well as system settings."},
               {'name': 'Auth', 'description': "Auth user methods in server"},
-              {'name': "User", 'description': "User's information. Checking login and password"}]
+              {'name': "User", 'description': "User's information. Checking login and password"},
+              {'name': "For all", 'description': "Routes for all users"}]
     )
     app.openapi_schema = openapi_schema
     return app.openapi_schema
