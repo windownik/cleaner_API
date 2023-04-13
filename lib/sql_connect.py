@@ -6,7 +6,6 @@ from fastapi_asyncpg import configure_asyncpg
 from lib.app_init import app
 from fastapi import Depends
 
-
 password = os.environ.get("DATABASE_PASS")
 host = os.environ.get("DATABASE_HOST")
 port = os.environ.get("DATABASE_PORT")
@@ -16,7 +15,6 @@ password = 102015 if password is None else password
 host = '127.0.0.1' if host is None else host
 port = 5432 if port is None else port
 db_name = 'cleaner_api' if db_name is None else db_name
-
 
 # Создаем новую таблицу
 data_b = configure_asyncpg(app, f'postgres://postgres:{password}@{host}:{port}/{db_name}')
@@ -114,6 +112,14 @@ async def create_user(db: Depends, phone, email, name, auth_type, auth_id, descr
 
 
 # Создаем новую таблицу
+async def save_users_work(db: Depends, user_id: int, work_type: str, object_id: int, object_size: int):
+    await db.fetch(f"INSERT INTO work (user_id, work_type, object_id, object_size) "
+                   f"VALUES ($1, $2, $3, $4) "
+                   f"ON CONFLICT DO NOTHING;", user_id, work_type, object_id, object_size)
+    return user_id
+
+
+# Создаем новую таблицу
 async def create_token(db: Depends, user_id, token_type):
     create_date = datetime.datetime.now()
     if token_type == 'access':
@@ -145,6 +151,12 @@ async def read_data(db: Depends, table: str, id_name: str, id_data, name: str):
 
 
 # Создаем новую таблицу
+async def read_all(db: Depends, table: str, name: str = '*'):
+    data = await db.fetch(f"SELECT {name} FROM {table};")
+    return data
+
+
+# Создаем новую таблицу
 async def read_data_2_were(db: Depends, table: str, id_name1: str, id_name2: str, id_data1, id_data2, name: str):
     data = await db.fetch(f"SELECT {name} FROM {table} WHERE {id_name1} = $1 AND  {id_name2} = $1;", id_data1, id_data2)
     return data
@@ -163,8 +175,9 @@ async def get_token(db: Depends, token_type: str, token: str):
 
 
 # Создаем новую таблицу
-async def update_user(db: Depends, name: str, phone: int, email: str,  description: str, lang: str, city: str, house: str,
-                      street: str,  latitudes: float, longitudes: float, status: str, range: int, user_id: int):
+async def update_user(db: Depends, name: str, phone: int, email: str, description: str, lang: str, city: str,
+                      house: str,
+                      street: str, latitudes: float, longitudes: float, status: str, range: int, user_id: int):
     user_id = await db.fetch(f"UPDATE all_users SET name=$1, phone=$2, email=$3, description=$4, lang=$5, city=$6, "
                              f"street=$7, house=$8, latitudes=$9, longitudes=$10, status=$11, range=$12 WHERE "
                              f"user_id=$13;",
@@ -201,3 +214,8 @@ async def delete_old_tokens(db: Depends):
 # Удаляем токены
 async def delete_all_tokens(db: Depends, user_id: int):
     await db.execute(f"DELETE FROM token WHERE user_id = $1", user_id)
+
+
+# Удаляем все записи из таблицы по ключу
+async def delete_where(db: Depends, table: str, id_name: str, data):
+    await db.execute(f"DELETE FROM {table} WHERE {id_name} = $1", data)

@@ -166,12 +166,3 @@ async def update_user_information(name: str, phone: int, email: str, description
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'}
                         )
-
-
-@app.post(path='/user_profession', tags=['User'], responses=update_user_res)
-async def update_user_profession(work_list: str, access_token: str, db=Depends(data_b.connection)):
-    """Update user's profession information."""
-    user_id = await conn.get_token(db=db, token_type='access', token=access_token)
-    if not user_id:
-        return JSONResponse(content="bad access token",
-                            status_code=_status.HTTP_401_UNAUTHORIZED)
