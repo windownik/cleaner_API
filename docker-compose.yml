@@ -9,7 +9,7 @@ services:
     ports:
       - "5444:5432"
   api:
-    build: main
+    build: .
     environment:
       IP_SERVER: "185.51.247.27"
       PORT_SERVER: 10010
@@ -20,7 +20,7 @@ services:
       DATABASE_PORT: 5432
       DATABASE_NAME: postgres
     volumes:
-      - ./main:/main
+      - ./:/main
     ports:
       - "10020:10020"
 

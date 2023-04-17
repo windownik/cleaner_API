@@ -20,4 +20,4 @@ RUN pip3 install python-multipart
 RUN pip3 install firebase-admin
 
 
-CMD ["python3", "main.py"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10020"]
