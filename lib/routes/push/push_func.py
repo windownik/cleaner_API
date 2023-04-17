@@ -21,6 +21,6 @@ def send_push(fcm_token: str, title: str, body: str, main_text: str, push_type: 
     )
     response = messaging.send(message)
 
-
-send_push(fcm_token='cLJnxualQXGqcFrFpM29EA:APA91bFvBA6UVeX3y-QVo5XgeT_7vaTZsCoqE4iKFwN-FnTTlMGMLb1xlVEv9OGJNdiKSFDC3MxJkBtcsFw84FVLymSkxSp1TSe_32Ef2e1yN5gpLnYKKnu67x8jIYvxBZLy-ltRZTPF',
-          title='Test text', body='11111111111', main_text='hi text', push_type='ewwrfvfrvd')
+#
+# send_push(fcm_token='cLJnxualQXGqcFrFpM29EA:APA91bFvBA6UVeX3y-QVo5XgeT_7vaTZsCoqE4iKFwN-FnTTlMGMLb1xlVEv9OGJNdiKSFDC3MxJkBtcsFw84FVLymSkxSp1TSe_32Ef2e1yN5gpLnYKKnu67x8jIYvxBZLy-ltRZTPF',
+#           title='Test text', body='11111111111', main_text='hi text', push_type='ewwrfvfrvd')
