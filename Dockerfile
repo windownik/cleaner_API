@@ -1,8 +1,8 @@
 FROM python:3.10
 
-WORKDIR /auth/
+WORKDIR /main/
 
-COPY . /auth/
+COPY . /main/
 
 ENV TZ=Europe/Moscow
 RUN apt-get update && apt-get install -yy tzdata
@@ -16,6 +16,8 @@ ENV PYTHONUNBUFFERED 1
 RUN pip3 install aiohttp
 RUN pip3 install uvicorn fastapi
 RUN pip3 install fastapi-asyncpg
+RUN pip3 install python-multipart
+RUN pip3 install firebase-admin
 
 
-CMD ["python3", "auth_server.py"]
+CMD ["python3", "main.py"]

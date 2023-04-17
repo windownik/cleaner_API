@@ -40,7 +40,8 @@ async def create_all_users_table(db):
  status TEXT DEFAULT 'worker',
  range BIGINT DEFAULT 500,
  longitudes DOUBLE PRECISION,
- latitudes DOUBLE PRECISION, 
+ latitudes DOUBLE PRECISION,
+ push TEXT DEFAULT '0',
  last_active timestamp,
  create_date timestamp)''')
 

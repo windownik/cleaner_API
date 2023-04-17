@@ -9,7 +9,7 @@ from lib.sql_connect import data_b, app
 ip_server = os.environ.get("IP_SERVER")
 ip_port = os.environ.get("PORT_SERVER")
 
-ip_port = 10001 if ip_port is None else ip_port
+ip_port = 10020 if ip_port is None else ip_port
 ip_server = "127.0.0.1" if ip_server is None else ip_server
 
 
