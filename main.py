@@ -23,18 +23,17 @@ def custom_openapi():
         routes=app.routes,
         tags=[
             {'name': 'System', 'description': "Checking login and password, as well as system settings."},
-              {'name': 'Auth', 'description': "Auth user methods in server"},
-              {'name': "User", 'description': "User's information. Checking login and password"},
-              {'name': "For all", 'description': "Routes for all users"},
-              {'name': "Work", 'description': "All about users work and work types"}
-              ]
+            {'name': 'Auth', 'description': "Auth user methods in server"},
+            {'name': "User", 'description': "User's information. Checking login and password"},
+            {'name': "For all", 'description': "Routes for all users"},
+            {'name': "Work", 'description': "All about users work and work types"}
+        ]
     )
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
 
 app.openapi = custom_openapi
-
 
 if __name__ == '__main__':
     app.state.pgpool = asyncpg.create_pool()

@@ -72,7 +72,6 @@ async def get_profession_list(db=Depends(data_b.connection)):
                 'name_ru': i[1],
                 'name_en': i[2],
                 'name_heb': i[3],
-
             }
         )
 
