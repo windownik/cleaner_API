@@ -78,7 +78,7 @@ async def new_user(name: str, phone: int, email: str, auth_type: str, auth_id: i
         'create_date': None
     }
     if auth_type == 'fb':
-        if not await user_fb_check_auth(access_token, user_id=auth_id):
+        if not await user_fb_check_auth(access_token, user_id=auth_id, email=email):
             return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
                                 content={"ok": False,
                                          'description': 'Bad auth_id or access_token', })

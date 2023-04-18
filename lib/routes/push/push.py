@@ -32,10 +32,10 @@ async def send_push_notification(access_token: str, user_id: int, title: str, pu
     main_text - Main text of message
     push_type - can be: read_bill,
     """
-    user_id = await conn.get_token(db=db, token_type='access', token=access_token)
-    if not user_id:
+    owner_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not owner_id:
         return Response(content="not enough rights", status_code=_status.HTTP_401_UNAUTHORIZED)
-    user_id = user_id[0][0]
+
     push_token = await conn.read_data(db=db, table='all_users', name='push', id_name='user_id', id_data=user_id)
     if not push_token:
         return Response(content="no user in database", status_code=_status.HTTP_400_BAD_REQUEST)
@@ -51,7 +51,7 @@ async def find_phone_in_db(access_token: str, push_token: str, db=Depends(data_b
     if not user_id:
         return Response(content="not enough rights", status_code=_status.HTTP_401_UNAUTHORIZED)
     user_id = user_id[0][0]
-    await conn.update_data(db=db, table='all_users', name='push', data=push_token, id_name='id', id_data=user_id)
+    await conn.update_data(db=db, table='all_users', name='push', data=push_token, id_name='user_id', id_data=user_id)
 
     return JSONResponse(content={'ok': True, 'desc': 'successfully updated'},
                         headers={'content-type': 'application/json; charset=utf-8'})

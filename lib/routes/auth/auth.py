@@ -5,6 +5,8 @@ from fastapi import Depends
 from starlette.responses import JSONResponse
 
 from lib import sql_connect as conn
+from lib.check_access_fb import user_fb_check_auth
+from lib.db_objects import User
 from lib.response_examples import *
 from lib.sql_connect import data_b, app
 
@@ -38,12 +40,54 @@ async def create_new_access_token(refresh_token: str, db=Depends(data_b.connecti
             'access_token': access[0][0]}
 
 
-@app.get(path='/check_phone', tags=['Auth'], responses=check_phone_res)
-async def find_phone_in_db(phone: int, db=Depends(data_b.connection)):
-    """Check user in database"""
-    user = await conn.read_data(db=db, name='id', table='all_users', id_name='phone', id_data=phone)
-    if user:
-        return JSONResponse(content={"ok": False,
-                                     'description': "have user with same phone"},
-                            status_code=_status.HTTP_226_IM_USED)
-    return {"ok": True, 'desc': 'no phone in database'}
+@app.get(path='/login', tags=['Auth'], responses=check_phone_res)
+async def login_user(email: str, auth_type: str, auth_id: int, access_token: str,
+                           db=Depends(data_b.connection)):
+    """Login user in service by fb"""
+    user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='email', id_data=email)
+    if not user_data:
+        return JSONResponse(content={"ok": True,
+                                     'description': 'This email is not in database', },
+                            status_code=_status.HTTP_200_OK,
+                            headers={'content-type': 'application/json; charset=utf-8'})
+
+    if auth_type == 'fb':
+        if not await user_fb_check_auth(access_token, user_id=auth_id, email=email):
+            return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
+                                content={"ok": False,
+                                         'description': 'Bad auth_id or access_token', })
+    else:
+        return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
+                            content={"ok": False,
+                                     'description': 'The selected auth type is not supported', })
+
+    user = User(user_data[0])
+
+    access = await conn.create_token(db=db, user_id=user.user_id, token_type='access')
+    refresh = await conn.create_token(db=db, user_id=user.user_id, token_type='refresh')
+
+    return JSONResponse(content={"ok": True,
+                                 'user': user.get_user_json(),
+                                 'access_token': access[0][0],
+                                 'refresh_token': refresh[0][0]
+                                 },
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.get(path='/user_email', tags=['Auth'], responses=get_me_res)
+async def check_email(email: str, db=Depends(data_b.connection), ):
+    """Here you can check your email.
+    email: string email for check it in db"""
+
+    user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='email', id_data=email)
+    if not user_data:
+        return JSONResponse(content={"ok": True,
+                                     'description': 'This email is not in database', },
+                            status_code=_status.HTTP_200_OK,
+                            headers={'content-type': 'application/json; charset=utf-8'})
+    return JSONResponse(content={"ok": True,
+                                 "auth_type": user_data[0]["auth_type"],
+                                 'description': 'This email is in database',},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
