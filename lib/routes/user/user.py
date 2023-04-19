@@ -94,7 +94,7 @@ async def new_user(name: str, phone: int, email: str, auth_type: str, auth_id: i
     refresh = await conn.create_token(db=db, user_id=user.user_id, token_type='refresh')
 
     return JSONResponse(content={"ok": True,
-                                 'user_id': user.user_id,
+                                 'user_id': user.get_user_json(),
                                  'access_token': access[0][0],
                                  'refresh_token': refresh[0][0]},
                         status_code=_status.HTTP_200_OK,
