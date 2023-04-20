@@ -67,7 +67,7 @@ async def new_user(name: str, phone: int, email: str, auth_type: str, auth_id: i
         'city': city,
         'street': street,
         'house': house,
-        'status': status,
+        'status': f'{status}_checking',
         'score': 5,
         'score_count': 0,
         'total_score': 0,
@@ -158,6 +158,12 @@ async def update_user_information(name: str, phone: int, email: str, description
                                      'description': "bad access token"},
                             status_code=_status.HTTP_401_UNAUTHORIZED)
 
+    user_status = await conn.read_data(db=db, name='status', table='all_users', id_name='user_id',
+                                       id_data=user_id[0][0])
+    if user_status:
+        if status != user_status[0][0]:
+            status = f'{status}_checking'
+
     await conn.update_user(db=db, name=name, phone=phone, email=email, description=description, lang=lang, city=city,
                            street=street, house=house, latitudes=latitudes, longitudes=longitudes,
                            status=status, range=range, user_id=user_id[0][0])
@@ -166,3 +172,37 @@ async def update_user_information(name: str, phone: int, email: str, description
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'}
                         )
+
+
+@app.put(path='/user_status', tags=['Admin'], responses=update_user_res)
+async def update_user_information(user_id: int, status: str, access_token: str, db=Depends(data_b.connection)):
+    """Admin Update user's status.
+
+    user_id: users number from our service\n
+    status: can be: worker, customer, admin, ban\n
+    access_token: (Долгота) of home/work address\n"""
+
+    if status != 'customer' and status != 'worker' and status != 'admin' and status != 'ban':
+        return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
+                            content={"ok": False,
+                                     'description': 'Bad users status', })
+
+    admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
+    if not admin_id:
+        return JSONResponse(content={"ok": False,
+                                     'description': "bad access token or not enough rights"},
+                            status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    user_data = await conn.read_data(db=db, name='status', table='all_users', id_name='user_id',
+                                       id_data=user_id)
+    if user_data is None:
+        return JSONResponse(content={"ok": False,
+                                     'description': "I haven't user with this user_id."},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    await conn.update_data(db=db, name='status', id_name='user_id', id_data=user_id)
+
+    return JSONResponse(content={"ok": True,
+                                 'desc': 'users status updated'},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})

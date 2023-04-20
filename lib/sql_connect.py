@@ -176,6 +176,19 @@ async def get_token(db: Depends, token_type: str, token: str):
 
 
 # Создаем новую таблицу
+async def get_token_admin(db: Depends, token_type: str, token: str):
+    now = datetime.datetime.now()
+    data = await db.fetch(f"SELECT user_id FROM token "
+                          f"WHERE token_type = $1 "
+                          f"AND status = admin "
+                          f"AND token = $2 "
+                          f"AND death_date > $3 "
+                          f"AND change_password = 0;",
+                          token_type, token, now)
+    return data
+
+
+# Создаем новую таблицу
 async def update_user(db: Depends, name: str, phone: int, email: str, description: str, lang: str, city: str,
                       house: str,
                       street: str, latitudes: float, longitudes: float, status: str, range: int, user_id: int):

@@ -4,7 +4,7 @@ import asyncpg
 import uvicorn
 from fastapi.openapi.utils import get_openapi
 
-from lib.sql_connect import data_b, app
+from lib.sql_connect import app
 
 ip_server = os.environ.get("IP_SERVER")
 ip_port = os.environ.get("PORT_SERVER")
@@ -26,7 +26,8 @@ def custom_openapi():
             {'name': 'Auth', 'description': "Auth user methods in server"},
             {'name': "User", 'description': "User's information. Checking login and password"},
             {'name': "For all", 'description': "Routes for all users"},
-            {'name': "Work", 'description': "All about users work and work types"}
+            {'name': "Work", 'description': "All about users work and work types"},
+            {'name': "Admin users", 'description': "All admins routes for work with users"},
         ]
     )
     app.openapi_schema = openapi_schema
