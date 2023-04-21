@@ -2,11 +2,9 @@ import os
 
 import starlette.status as _status
 from fastapi import Depends
-from starlette.responses import Response, JSONResponse
+from starlette.responses import JSONResponse
 
 from lib import sql_connect as conn
-from lib.check_access_fb import user_fb_check_auth
-from lib.db_objects import User
 from lib.response_examples import *
 from lib.sql_connect import data_b, app
 
@@ -23,7 +21,7 @@ async def initialization(connect):
     await connect.execute("SELECT 1")
 
 
-@app.put(path='/user_status', tags=['Admin users'], responses=update_user_res)
+@app.put(path='/user_status', tags=['Admin users'], responses=update_user_status_res)
 async def update_user_information(user_id: int, status: str, access_token: str, db=Depends(data_b.connection)):
     """Admin Update user's status.
 

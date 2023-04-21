@@ -40,7 +40,7 @@ async def create_new_access_token(refresh_token: str, db=Depends(data_b.connecti
             'access_token': access[0][0]}
 
 
-@app.get(path='/login', tags=['Auth'], responses=check_phone_res)
+@app.get(path='/login', tags=['Auth'], responses=login_get_res)
 async def login_user(email: str, auth_type: str, auth_id: int, access_token: str,
                            db=Depends(data_b.connection)):
     """Login user in service by fb"""

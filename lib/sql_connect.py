@@ -209,13 +209,13 @@ async def update_data(db: Depends, table: str, name: str, id_data, data, id_name
 # Обновляем информацию
 async def update_user_active(db: Depends, user_id: int):
     now = datetime.datetime.now()
-    await db.fetch(f"UPDATE all_users SET last_active=$1 WHERE id=$2;",
+    await db.fetch(f"UPDATE all_users SET last_active=$1 WHERE user_id=$2;",
                    now, user_id)
 
 
 # Обновляем информацию
 async def update_password(db: Depends, user_id: int, password_hash: str):
-    await db.fetch(f"UPDATE all_users SET password_hash=$1 WHERE id=$2;",
+    await db.fetch(f"UPDATE all_users SET password_hash=$1 WHERE user_id=$2;",
                    password_hash, user_id)
 
 

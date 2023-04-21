@@ -131,6 +131,23 @@ update_user_res = {
     },
 }
 
+update_user_status_res = {
+    200: {
+        "description": "Success",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "odd": {
+                        "summary": "Success",
+                        "value": {"ok": True,
+                                  'desc': 'users status updated'}
+                    },
+                }
+            }
+        }
+    },
+}
+
 update_user_profession_res = {
     200: {
         "description": "Success",
@@ -148,7 +165,7 @@ update_user_profession_res = {
     },
 }
 
-login_res = {
+login_get_res = {
     200: {
         "description": "Success",
         "content": {
@@ -170,7 +187,8 @@ login_res = {
                 "examples": {
                     "odd": {
                         "summary": "Success",
-                        "value": "bad phone or password"
+                        "value": {"ok": False,
+                                  'description': 'Bad auth_id or access_token'}
                     },
                 }
             }
