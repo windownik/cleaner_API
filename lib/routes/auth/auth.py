@@ -5,7 +5,7 @@ from fastapi import Depends
 from starlette.responses import JSONResponse
 
 from lib import sql_connect as conn
-from lib.check_access_fb import user_fb_check_auth
+from lib.check_access_fb import user_fb_check_auth, user_google_check_auth
 from lib.db_objects import User
 from lib.response_examples import *
 from lib.sql_connect import data_b, app
@@ -53,6 +53,11 @@ async def login_user(email: str, auth_type: str, auth_id: int, access_token: str
 
     if auth_type == 'fb':
         if not await user_fb_check_auth(access_token, user_id=auth_id, email=email):
+            return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
+                                content={"ok": False,
+                                         'description': 'Bad auth_id or access_token', })
+    elif auth_type == 'google':
+        if not user_google_check_auth(access_token=access_token, email=email):
             return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
                                 content={"ok": False,
                                          'description': 'Bad auth_id or access_token', })

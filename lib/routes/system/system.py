@@ -4,6 +4,7 @@ from fastapi import Depends
 from fastapi.responses import HTMLResponse
 
 from lib import sql_connect as conn
+from lib.check_access_fb import user_google_check_auth
 from lib.sql_connect import data_b, app
 
 ip_server = os.environ.get("IP_SERVER")
