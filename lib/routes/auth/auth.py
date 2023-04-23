@@ -42,8 +42,8 @@ async def create_new_access_token(refresh_token: str, db=Depends(data_b.connecti
 
 @app.get(path='/login', tags=['Auth'], responses=login_get_res)
 async def login_user(email: str, auth_type: str, auth_id: int, access_token: str,
-                           db=Depends(data_b.connection)):
-    """Login user in service by fb"""
+                     db=Depends(data_b.connection)):
+    """Login user in service by fb or google"""
     user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='email', id_data=email)
     if not user_data:
         return JSONResponse(content={"ok": True,
@@ -52,6 +52,7 @@ async def login_user(email: str, auth_type: str, auth_id: int, access_token: str
                             headers={'content-type': 'application/json; charset=utf-8'})
 
     if auth_type == 'fb':
+
         if not await user_fb_check_auth(access_token, user_id=auth_id, email=email):
             return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
                                 content={"ok": False,
@@ -65,6 +66,9 @@ async def login_user(email: str, auth_type: str, auth_id: int, access_token: str
         return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
                             content={"ok": False,
                                      'description': 'The selected auth type is not supported', })
+
+    await conn.update_data(db=db, table='all_users', name='auth_type', id_name='user_id', id_data=user_data[0][0],
+                           data=auth_type)
 
     user = User(user_data[0])
 
@@ -93,6 +97,6 @@ async def check_email(email: str, db=Depends(data_b.connection), ):
                             headers={'content-type': 'application/json; charset=utf-8'})
     return JSONResponse(content={"ok": True,
                                  "auth_type": user_data[0]["auth_type"],
-                                 'description': 'This email is in database',},
+                                 'description': 'This email is in database', },
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
