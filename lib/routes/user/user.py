@@ -199,7 +199,7 @@ async def update_user_information(user_id: int, status: str, access_token: str, 
                             status_code=_status.HTTP_401_UNAUTHORIZED)
 
     user_data = await conn.read_data(db=db, name='status', table='all_users', id_name='user_id',
-                                       id_data=user_id)
+                                     id_data=user_id)
     if user_data is None:
         return JSONResponse(content={"ok": False,
                                      'description': "I haven't user with this user_id."},

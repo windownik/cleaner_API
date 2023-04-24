@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 
 from lib import sql_connect as conn
 from lib.check_access_fb import user_google_check_auth
-from lib.sql_connect import data_b, app
+from lib.sql_connect import data_b, app, create_msg_line_table
 
 ip_server = os.environ.get("IP_SERVER")
 ip_port = os.environ.get("PORT_SERVER")
@@ -28,6 +28,7 @@ async def init_database(db=Depends(data_b.connection)):
     await conn.create_work_table(db)
     await conn.create_work_type_table(db)
     await conn.create_files_table(db)
+    await create_msg_line_table(db)
     return {"ok": True}
 
 

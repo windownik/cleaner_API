@@ -328,3 +328,20 @@ send_push_res = {
         }
     },
 }
+
+
+new_msg_created_res = {
+    200: {
+        "description": "Success",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "odd": {
+                        "summary": "Success",
+                        "value": {"ok": True, 'desc': 'New message was created successfully.'}
+                    },
+                }
+            }
+        }
+    },
+}

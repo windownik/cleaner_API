@@ -87,7 +87,7 @@ async def create_work_type_table(db):
 
 
 # Создаем новую таблицу
-# Таблица для записи статей затрат в одном счете
+# Таблица для записи статей информации о файлах
 async def create_files_table(db):
     await db.execute(f'''CREATE TABLE IF NOT EXISTS files (
  id SERIAL PRIMARY KEY,
@@ -100,11 +100,33 @@ async def create_files_table(db):
 
 
 # Создаем новую таблицу
+# Таблица для записи всех видов сообщений для всех пользователей
+async def create_msg_line_table(db):
+    await db.execute(f'''CREATE TABLE IF NOT EXISTS message_line (
+ id SERIAL PRIMARY KEY,
+ msg_id INTEGER DEFAULT 0,
+ msg_type TEXT DEFAULT '0',
+ title TEXT DEFAULT '0',
+ text TEXT DEFAULT '0',
+ description TEXT DEFAULT '0',
+ lang TEXT DEFAULT 'en',
+ from_id INTEGER DEFAULT 0,
+ to_id INTEGER DEFAULT 0,
+ status TEXT DEFAULT 'created',
+ user_type TEXT DEFAULT 'user',
+ read_date timestamp,
+ deleted_date timestamp,
+ create_date timestamp
+ )''')
+
+
+# Создаем новую таблицу
 async def create_user(db: Depends, phone, email, name, auth_type, auth_id, description, lang, city, street, house,
                       status, longitudes, latitudes, image_link: str):
     now = datetime.datetime.now()
     user_id = await db.fetch(f"INSERT INTO all_users (phone, email, name, auth_type, auth_id, description, lang, "
-                             f"city, street, house, status, longitudes, latitudes, image_link, last_active, create_date) "
+                             f"city, street, house, status, longitudes, latitudes, image_link, last_active, "
+                             f"create_date) "
                              f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) "
                              f"ON CONFLICT DO NOTHING RETURNING user_id;", phone, email, name, auth_type, auth_id,
                              description, lang, city, street, house, status, longitudes, latitudes, image_link, now,
@@ -120,7 +142,7 @@ async def save_users_work(db: Depends, user_id: int, work_type: str, object_id: 
     return user_id
 
 
-# Создаем новую таблицу
+# Создаем новый токен
 async def create_token(db: Depends, user_id, token_type):
     create_date = datetime.datetime.now()
     if token_type == 'access':
@@ -136,6 +158,18 @@ async def create_token(db: Depends, user_id, token_type):
     return token
 
 
+# Создаем новое сообщение
+async def create_msg(db: Depends, msg_id: int, msg_type: str, title: str, text: str, description: str, lang: str,
+                     from_id: int, to_id: int, user_type: str):
+    now = datetime.datetime.now()
+    new_id = await db.fetch(f"INSERT INTO message_line (msg_id, msg_type, title, text, description, lang, from_id, "
+                            f"to_id, user_type, create_date) "
+                            f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) "
+                            f"ON CONFLICT DO NOTHING RETURNING id;",
+                            msg_id, msg_type, title, text, description, lang, from_id, to_id, user_type, now)
+    return new_id
+
+
 # Создаем новую запись в базе данных
 async def save_new_file(db: Depends, file_name: str, file_path: str, file_type: str, owner_id: int):
     now = datetime.datetime.now()
@@ -145,25 +179,51 @@ async def save_new_file(db: Depends, file_name: str, file_path: str, file_type: 
     return file_id
 
 
-# Создаем новую таблицу
+# получаем данные с одним фильтром
 async def read_data(db: Depends, table: str, id_name: str, id_data, name: str):
     data = await db.fetch(f"SELECT {name} FROM {table} WHERE {id_name} = $1;", id_data)
     return data
 
 
-# Создаем новую таблицу
+# получаем данные без фильтров
 async def read_all(db: Depends, table: str, name: str = '*'):
     data = await db.fetch(f"SELECT {name} FROM {table};")
     return data
 
 
-# Создаем новую таблицу
+# получаем данные без фильтров
+async def count_msg(db: Depends, lang: str, user_id: int, user_type: str):
+    lang_str = ''
+    if lang is not None:
+        lang_str = f" AND lang='{lang}'"
+
+    data = await db.fetch(f"SELECT COUNT(id) FROM message_line "
+                          f"WHERE (to_id=$1 OR (user_type=$2{lang_str})) "
+                          f"AND status='created';", user_id, user_type)
+    return data
+
+
+# получаем все новые сообщения для пользователя с id
+async def read_all_msg(db: Depends, user_id: int, user_type: str, lang: str = None, offset: int = 0, limit: int = 0,):
+    lang_str = ''
+    if lang is not None:
+        lang_str = f" AND lang='{lang}'"
+
+    if offset != 0 and limit != 0:
+        offset_limit = f" OFFSET {offset} LIMIT {limit}"
+    data = await db.fetch(f"SELECT * FROM message_line "
+                          f"WHERE (to_id=$1 OR (user_type=$2{lang_str})) "
+                          f"AND status='created' ORDER BY id{offset_limit};", user_id, user_type)
+    return data
+
+
+# получаем данные с 2 фильтрами
 async def read_data_2_were(db: Depends, table: str, id_name1: str, id_name2: str, id_data1, id_data2, name: str):
     data = await db.fetch(f"SELECT {name} FROM {table} WHERE {id_name1} = $1 AND  {id_name2} = $1;", id_data1, id_data2)
     return data
 
 
-# Создаем новую таблицу
+# Проверяем токен на валидность и возвращаем user_id
 async def get_token(db: Depends, token_type: str, token: str):
     now = datetime.datetime.now()
     data = await db.fetch(f"SELECT user_id FROM token "
@@ -175,12 +235,11 @@ async def get_token(db: Depends, token_type: str, token: str):
     return data
 
 
-# Создаем новую таблицу
+# Проверяем токен на валидность и возвращаем user_id
 async def get_token_admin(db: Depends, token_type: str, token: str):
     now = datetime.datetime.now()
     data = await db.fetch(f"SELECT user_id FROM token "
                           f"WHERE token_type = $1 "
-                          f"AND status = admin "
                           f"AND token = $2 "
                           f"AND death_date > $3 "
                           f"AND change_password = 0;",

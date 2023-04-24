@@ -30,7 +30,7 @@ async def send_push_notification(access_token: str, user_id: int, title: str, pu
     title - Title of push\n
     push_body - Text body of push message\n
     main_text - Main text of message
-    push_type - can be: read_bill,
+    push_type - can be: 'text_msg', 'deal',
     """
     owner_id = await conn.get_token(db=db, token_type='access', token=access_token)
     if not owner_id:
