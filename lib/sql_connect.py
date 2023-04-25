@@ -209,12 +209,14 @@ async def read_all_msg(db: Depends, user_id: int, user_type: str, lang: str = No
     offset_limit = ''
     if lang is not None:
         lang_str = f" AND lang='{lang}'"
+    if user_type == 'admin':
+        lang_str = ""
 
     if offset != 0 and limit != 0:
         offset_limit = f" OFFSET {offset} LIMIT {limit}"
     data = await db.fetch(f"SELECT * FROM message_line "
-                          f"WHERE (to_id=$1 OR (user_type=$2{lang_str})) "
-                          f"AND status='created' ORDER BY id{offset_limit};", user_id, user_type)
+                          f"WHERE ((to_id=$1 OR (user_type=$2{lang_str})) "
+                          f"AND status='created') ORDER BY id{offset_limit};", user_id, user_type)
     return data
 
 
