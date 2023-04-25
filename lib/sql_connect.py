@@ -180,7 +180,7 @@ async def save_new_file(db: Depends, file_name: str, file_path: str, file_type: 
 
 
 # получаем данные с одним фильтром
-async def read_data(db: Depends, table: str, id_name: str, id_data, name: str):
+async def read_data(db: Depends, table: str, id_name: str, id_data, name: str = '*'):
     data = await db.fetch(f"SELECT {name} FROM {table} WHERE {id_name} = $1;", id_data)
     return data
 
@@ -206,6 +206,7 @@ async def count_msg(db: Depends, lang: str, user_id: int, user_type: str):
 # получаем все новые сообщения для пользователя с id
 async def read_all_msg(db: Depends, user_id: int, user_type: str, lang: str = None, offset: int = 0, limit: int = 0,):
     lang_str = ''
+    offset_limit = ''
     if lang is not None:
         lang_str = f" AND lang='{lang}'"
 

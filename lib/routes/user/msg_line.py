@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import starlette.status as _status
@@ -5,7 +6,7 @@ from fastapi import Depends
 from starlette.responses import Response, JSONResponse
 
 from lib import sql_connect as conn
-from lib.db_objects import User
+from lib.db_objects import User, Message
 from lib.response_examples import *
 from lib.routes.push.push import send_push_notification
 from lib.sql_connect import data_b, app
@@ -24,7 +25,7 @@ async def initialization(connect):
 
 
 # Create new msg
-@app.post(path='/create_msg', tags=['Message'], responses=new_msg_created_res)
+@app.post(path='/message', tags=['Message'], responses=new_msg_created_res)
 async def create_new_messages(access_token: str, to_user_id: int, title: str, text: str, description: str,
                               user_type: str = 'user', lang: str = 'en',
                               msg_type: str = 'text', msg_id: int = 0, push: bool = False,
@@ -65,7 +66,7 @@ async def create_new_messages(access_token: str, to_user_id: int, title: str, te
                             status_code=_status.HTTP_400_BAD_REQUEST)
 
     msg_id = await conn.create_msg(msg_id=msg_id, msg_type=msg_type, title=title, text=text, description=description,
-                                   lang=lang, from_id=from_id, to_id=to_user_id, user_type=user_type, db=db)
+                                   lang=lang, from_id=from_id[0][0], to_id=to_user_id, user_type=user_type, db=db)
     if msg_id is None:
         return JSONResponse(content={"ok": False, "desc": "I can't create this message"},
                             status_code=_status.HTTP_400_BAD_REQUEST)
@@ -79,23 +80,102 @@ async def create_new_messages(access_token: str, to_user_id: int, title: str, te
 
 
 @app.get(path='/get_my_msg', tags=['Message'], responses=get_me_res)
-async def get_all_my_messages(access_token: str, offset: int, limit: int, db=Depends(data_b.connection), ):
-    """Here you can get new moder messages.
+async def get_all_my_messages(access_token: str, offset: int = 0, limit: int = 0, db=Depends(data_b.connection),
+                              lang: str = 'en', user_type: str = 'user'):
+    """Here you can get new message list.
     access_token: This is access auth token. You can get it when create account or login"""
     user_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
     if not user_id:
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
-    msg_data = await conn.read_all_msg(db=db, user_type='admin', lang='message_line', user_id=user_id[0][0])
-    count = await conn.count_msg(db=db, table='message_line', name='')
+    msg_data = await conn.read_all_msg(db=db, user_type=user_type, lang=lang, user_id=user_id[0][0], offset=offset,
+                                       limit=limit)
+    count = await conn.count_msg(db=db, user_type=user_type, lang=lang, user_id=user_id[0][0])
     msg_list = []
-    if not msg_data:
-        return Response(content="no user in database",
+
+    for msg_data in msg_data:
+        msg = Message(data=msg_data)
+        msg_list.append(
+            msg.get_msg_json()
+        )
+    return JSONResponse(content={"ok": True,
+                                 'count': count[0][0],
+                                 'msg_list': msg_list},
+
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.get(path='/message', tags=['Message'], responses=get_msg_by_id_res)
+async def get_messages_by_id(access_token: str, msg_id: int, db=Depends(data_b.connection)):
+    """Here you can get message by message id.
+    access_token: This is access auth token. You can get it when create account or login"""
+    user_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not user_id:
+        return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
-    # # user = User(user_data[0])
-    # return JSONResponse(content={"ok": True,
-    #                              'count':
-    #                              'user': user.get_user_json(),},
-    #                     status_code=_status.HTTP_200_OK,
-    #                     headers={'content-type': 'application/json; charset=utf-8'})
+
+    msg_data = await conn.read_data(db=db, table='message_line', id_name='id', id_data=msg_id)
+    if not msg_data:
+        return JSONResponse(content={"ok": True,
+                                     'message': 'No msg in database'},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+    user_id = user_id[0][0]
+    user_status = await conn.read_data(db=db, table='all_users', id_name='user_id', name='status', id_data=user_id)
+
+    user_from = await conn.read_data(db=db, table='all_users', id_name='user_id',
+                                     id_data=msg_data[0]['from_id'])
+    user_to = await conn.read_data(db=db, table='all_users', id_name='user_id',
+                                   id_data=msg_data[0]['to_id'])
+
+    if (msg_data[0]['to_id'] == user_id or msg_data[0]['from_id'] == user_id) or (msg_data[0]['user_type'] == 'all') \
+            or user_status[0][0] == 'admin':
+        pass
+    else:
+        return JSONResponse(content={"ok": True,
+                                     'message': "You haven't rights"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+    print(1, user_from)
+    print(2, user_to)
+
+    msg = Message(
+        data=msg_data[0],
+        user_from=user_from[0] if user_from else None,
+        user_to=user_to[0] if user_to else None)
+
+    return JSONResponse(content={"ok": True,
+                                 'message': msg.get_msg_json()},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.put(path='/message', tags=['Message'], responses=get_msg_by_id_res)
+async def read_message(access_token: str, msg_id: int, db=Depends(data_b.connection)):
+    """Use it if user open message and read.
+    access_token: This is access auth token. You can get it when create account or login"""
+    user_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not user_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+    user_id = user_id[0][0]
+
+    msg_data = await conn.read_data(db=db, table='message_line', id_name='id', id_data=msg_id)
+    if not msg_data:
+        return JSONResponse(content={"ok": True,
+                                     'message': 'No msg in database'},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    if user_id != msg_data[0]['to_id']:
+        return JSONResponse(content={"ok": True,
+                                     'message': "You haven't rights"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    await conn.update_data(table='message_line', id_name='id', name='read_date', data=datetime.datetime.now(),
+                           id_data=msg_id, db=db)
+    await conn.update_data(table='message_line', id_name='id', name='status', data='read', id_data=msg_id, db=db)
+
+    return JSONResponse(content={"ok": True,
+                                 'desc': 'Status and read date of msg was updated'},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})

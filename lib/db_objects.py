@@ -131,6 +131,7 @@ class Message:
     create_date: datetime.datetime = None
 
     def __init__(self, data: dict = None, user_from: dict = None, user_to: dict = None):
+
         if data is not None:
             self.line_id = data['id']
             self.msg_id = data['msg_id']
@@ -139,8 +140,8 @@ class Message:
             self.text = data['text']
             self.description = data['description']
             self.lang = data['lang']
-            self.from_user = User(user_from)
-            self.to_user = User(user_to)
+            self.from_user = User(user_from) if user_from is not None else data['from_id']
+            self.to_user = User(user_to) if user_to is not None else data['to_id']
             self.status = data['status']
             self.user_type = data['user_type']
             self.read_date: datetime.datetime = data['read_date'] if data['read_date'] is not None else None
@@ -156,8 +157,8 @@ class Message:
             'text': self.text,
             'description': self.description,
             'lang': self.lang,
-            'from_user': self.from_user.get_user_json(),
-            'to_user': self.to_user.get_user_json(),
+            'from_user': self.from_user.get_user_json() if type(self.from_user) == User else self.from_user,
+            'to_user': self.to_user.get_user_json() if type(self.to_user) == User else self.to_user,
             'status': self.status,
             'user_type': self.user_type,
             'read_date': str(self.read_date),
