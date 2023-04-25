@@ -35,6 +35,7 @@ async def update_user_information(user_id: int, status: str, access_token: str, 
                                      'description': 'Bad users status', })
 
     admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
+
     if not admin_id:
         return JSONResponse(content={"ok": False,
                                      'description': "bad access token or not enough rights"},
@@ -47,7 +48,7 @@ async def update_user_information(user_id: int, status: str, access_token: str, 
                                      'description': "I haven't user with this user_id."},
                             status_code=_status.HTTP_400_BAD_REQUEST)
 
-    await conn.update_data(db=db, name='status', id_name='user_id', id_data=user_id)
+    await conn.update_data(db=db, table='all_users', name='status', id_name='user_id', id_data=user_id, data=status)
 
     return JSONResponse(content={"ok": True,
                                  'desc': 'users status updated'},

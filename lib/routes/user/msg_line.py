@@ -136,9 +136,6 @@ async def get_messages_by_id(access_token: str, msg_id: int, db=Depends(data_b.c
         return JSONResponse(content={"ok": True,
                                      'message': "You haven't rights"},
                             status_code=_status.HTTP_400_BAD_REQUEST)
-    print(1, user_from)
-    print(2, user_to)
-
     msg = Message(
         data=msg_data[0],
         user_from=user_from[0] if user_from else None,
@@ -176,6 +173,6 @@ async def read_message(access_token: str, msg_id: int, db=Depends(data_b.connect
     await conn.update_data(table='message_line', id_name='id', name='status', data='read', id_data=msg_id, db=db)
 
     return JSONResponse(content={"ok": True,
-                                 'desc': 'Status and read date of msg was updated'},
+                                 'desc': 'Status and read inform of msg was updated'},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})

@@ -204,7 +204,7 @@ async def count_msg(db: Depends, lang: str, user_id: int, user_type: str):
 
 
 # получаем все новые сообщения для пользователя с id
-async def read_all_msg(db: Depends, user_id: int, user_type: str, lang: str = None, offset: int = 0, limit: int = 0,):
+async def read_all_msg(db: Depends, user_id: int, user_type: str, lang: str = None, offset: int = 0, limit: int = 0, ):
     lang_str = ''
     offset_limit = ''
     if lang is not None:
@@ -239,13 +239,19 @@ async def get_token(db: Depends, token_type: str, token: str):
 # Проверяем токен на валидность и возвращаем user_id
 async def get_token_admin(db: Depends, token_type: str, token: str):
     now = datetime.datetime.now()
-    data = await db.fetch(f"SELECT user_id FROM token "
-                          f"WHERE token_type = $1 "
-                          f"AND token = $2 "
-                          f"AND death_date > $3 "
-                          f"AND change_password = 0;",
-                          token_type, token, now)
-    return data
+    user_id = await db.fetch(f"SELECT user_id FROM token "
+                             f"WHERE token_type = $1 "
+                             f"AND token = $2 "
+                             f"AND death_date > $3 "
+                             f"AND change_password = 0;",
+                             token_type, token, now)
+    if not user_id:
+        return
+    status = await db.fetch(f"SELECT status FROM all_users "
+                            f"WHERE user_id = $1 AND "
+                            f"status = 'admin';",
+                            user_id[0][0])
+    return status
 
 
 # Создаем новую таблицу
