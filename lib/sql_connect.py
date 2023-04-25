@@ -251,7 +251,9 @@ async def get_token_admin(db: Depends, token_type: str, token: str):
                             f"WHERE user_id = $1 AND "
                             f"status = 'admin';",
                             user_id[0][0])
-    return status
+    if not status:
+        return
+    return user_id
 
 
 # Создаем новую таблицу
