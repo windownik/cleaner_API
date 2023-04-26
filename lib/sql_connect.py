@@ -192,31 +192,41 @@ async def read_all(db: Depends, table: str, name: str = '*'):
 
 
 # получаем данные без фильтров
-async def count_msg(db: Depends, lang: str, user_id: int, user_type: str):
-    lang_str = ''
-    if lang is not None:
-        lang_str = f" AND lang='{lang}'"
-
+async def count_msg(db: Depends, user_id: int):
     data = await db.fetch(f"SELECT COUNT(id) FROM message_line "
-                          f"WHERE (to_id=$1 OR (user_type=$2{lang_str})) "
-                          f"AND status='created';", user_id, user_type)
+                          f"WHERE (to_id=$1 OR (to_id=0 AND user_type='admin'));", user_id)
+    return data
+
+
+# получаем данные без фильтров
+async def count_msg_user(db: Depends, user_id: int):
+    data = await db.fetch(f"SELECT COUNT(id) FROM message_line "
+                          f"WHERE to_id=$1 AND status='created';", user_id)
     return data
 
 
 # получаем все новые сообщения для пользователя с id
-async def read_all_msg(db: Depends, user_id: int, user_type: str, lang: str = None, offset: int = 0, limit: int = 0, ):
-    lang_str = ''
+async def read_all_msg(db: Depends, user_id: int, offset: int = 0, limit: int = 0, ):
+
     offset_limit = ''
-    if lang is not None:
-        lang_str = f" AND lang='{lang}'"
-    if user_type == 'admin':
-        lang_str = ""
 
     if offset != 0 and limit != 0:
         offset_limit = f" OFFSET {offset} LIMIT {limit}"
     data = await db.fetch(f"SELECT * FROM message_line "
-                          f"WHERE ((to_id=$1 OR (user_type=$2{lang_str})) "
-                          f"AND status='created') ORDER BY id{offset_limit};", user_id, user_type)
+                          f"WHERE (to_id=$1 OR (to_id=0 AND user_type='admin')) "
+                          f"AND status='created' ORDER BY id{offset_limit};", user_id)
+    return data
+
+
+# получаем все новые сообщения для пользователя с id
+async def read_all_msg_user(db: Depends, user_id: int, user_type: str, offset: int = 0, limit: int = 0, ):
+
+    offset_limit = ''
+
+    if offset != 0 and limit != 0:
+        offset_limit = f" OFFSET {offset} LIMIT {limit}"
+    data = await db.fetch(f"SELECT * FROM message_line "
+                          f"WHERE to_id=$1 AND status='created' ORDER BY id{offset_limit};", user_id, user_type)
     return data
 
 

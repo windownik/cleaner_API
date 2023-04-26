@@ -31,20 +31,20 @@ async def create_new_messages(access_token: str, to_user_id: int, title: str, te
                               msg_type: str = 'text', msg_id: int = 0, push: bool = False,
                               db=Depends(data_b.connection)):
     """
-    Use this route for creating new message
+    Use this route for creating new message\n
 
 
-    :param description: short text\n
-    :param text: main text of message\n
-    :param title: title of message\n
-    :param msg_id: id of new document or another main document. Send 0 if only text message\n
-    :param access_token: user's access token in our service\n
-    :param to_user_id: user_id for personal msg sending for all users send value 0\n
-    :param user_type: can be 'user', 'admin', 'all'\n
-    :param push: Send True for sending push notification\n
-    :param lang: Can be 'en', 'ru', 'he'\n
-    :param msg_type: Can be 'text', 'new_user', 'new_deal'\n
-    :return: dict\n
+    description: short text\n
+    text: main text of message\n
+    title: title of message\n
+    msg_id: id of new document or another main document. Send 0 if only text message\n
+    access_token: user's access token in our service\n
+    to_user_id: user_id for personal msg sending for all users send value 0\n
+    user_type: can be 'user', 'admin', 'all'\n
+    push: Send True for sending push notification\n
+    lang: Can be 'en', 'ru', 'he'\n
+    msg_type: Can be 'text', 'new_user', 'new_deal'\n
+    return: dict\n
     """
     from_id = await conn.get_token(db=db, token_type='access', token=access_token)
     if not from_id:
@@ -80,18 +80,44 @@ async def create_new_messages(access_token: str, to_user_id: int, title: str, te
 
 
 @app.get(path='/get_my_msg', tags=['Message'], responses=get_me_res)
-async def get_all_my_messages(access_token: str, offset: int = 0, limit: int = 0, db=Depends(data_b.connection),
-                              lang: str = 'en', user_type: str = 'user'):
-    """Here you can get new message list.
+async def get_all_my_messages_admin(access_token: str, offset: int = 0, limit: int = 0, db=Depends(data_b.connection)):
+    """Here you can get new message list.\n
     access_token: This is access auth token. You can get it when create account or login"""
     user_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
     if not user_id:
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
-    msg_data = await conn.read_all_msg(db=db, user_type=user_type, lang=lang, user_id=user_id[0][0], offset=offset,
-                                       limit=limit)
-    count = await conn.count_msg(db=db, user_type=user_type, lang=lang, user_id=user_id[0][0])
+    msg_data = await conn.read_all_msg(db=db, user_id=user_id[0][0], offset=offset, limit=limit)
+    count = await conn.count_msg(db=db, user_id=user_id[0][0])
+    msg_list = []
+
+    for _msg_data in msg_data:
+        msg = Message(data=_msg_data)
+        msg_list.append(
+            msg.get_msg_json()
+        )
+    return JSONResponse(content={"ok": True,
+                                 'count': count[0][0],
+                                 'msg_list': msg_list},
+
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.get(path='/get_my_msg_user', tags=['Message'], responses=get_me_res)
+async def get_all_my_messages_admin(access_token: str, offset: int = 0, limit: int = 0, db=Depends(data_b.connection),
+                                    user_type: str = 'user'):
+    """Here you can get new message list. This routes for
+    access_token: This is access auth token. You can get it when create account or login"""
+    user_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not user_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    msg_data = await conn.read_all_msg_user(db=db, user_type=user_type, user_id=user_id[0][0], offset=offset,
+                                            limit=limit)
+    count = await conn.count_msg_user(db=db, user_id=user_id[0][0])
     msg_list = []
 
     for _msg_data in msg_data:
@@ -156,14 +182,15 @@ async def read_message(access_token: str, msg_id: int, db=Depends(data_b.connect
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
     user_id = user_id[0][0]
-
+    user_status = await conn.read_data(db=db, table='all_users', id_name='user_id', name='status', id_data=user_id)
     msg_data = await conn.read_data(db=db, table='message_line', id_name='id', id_data=msg_id)
     if not msg_data:
         return JSONResponse(content={"ok": True,
                                      'message': 'No msg in database'},
                             status_code=_status.HTTP_400_BAD_REQUEST)
-
-    if user_id != msg_data[0]['to_id']:
+    if msg_data[0]['to_id'] == 0 and user_status[0][0]:
+        pass
+    elif user_id != msg_data[0]['to_id']:
         return JSONResponse(content={"ok": True,
                                      'message': "You haven't rights"},
                             status_code=_status.HTTP_400_BAD_REQUEST)
