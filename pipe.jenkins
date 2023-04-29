@@ -20,14 +20,14 @@ pipeline {
                 sh 'ls'
             }
         }
-        stage("step delete images") {
-            steps {
-                sh 'docker rmi $(docker images -q)'
-            }
-        }
         stage("step git pull") {
             steps {
                 sh 'git pull'
+            }
+        }
+        stage("step down images") {
+            steps {
+                sh 'docker-compose down'
             }
         }
         stage("step up build docker") {
