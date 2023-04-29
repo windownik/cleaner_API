@@ -26,7 +26,7 @@ async def initialization(connect):
 async def send_push_notification(access_token: str, user_id: int, title: str, push_body: str, push_type: str,
                                  main_text: str = '0', db=Depends(data_b.connection)):
     """
-    Send push notifications
+    Send push notifi cations
     user_id - id of user for sending push\n
     title - Title of push\n
     push_body - Text body of push message\n
