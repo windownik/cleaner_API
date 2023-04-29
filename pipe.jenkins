@@ -22,7 +22,8 @@ pipeline {
         }
         stage('Prune Docker data') {
           steps {
-            sh 'docker system prune -a --volumes -f'
+            sh 'docker-compose down'
+            sh 'docker rmi $(docker images -q)'
           }
         }
         stage('Rework Docker containers') {
