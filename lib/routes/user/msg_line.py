@@ -79,8 +79,7 @@ async def create_new_messages(access_token: str, to_user_id: int, title: str, te
 
 
 @app.get(path='/get_my_msg', tags=['Message'], responses=get_me_res)
-async def get_all_my_messages(access_token: str, offset: int = 0, limit: int = 0, db=Depends(data_b.connection),
-                              lang: str = 'en', user_type: str = 'user'):
+async def get_all_my_messages(access_token: str, offset: int = 0, limit: int = 0, db=Depends(data_b.connection)):
     """Here you can get new message list.
     access_token: This is access auth token. You can get it when create account or login"""
     user_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
@@ -88,9 +87,9 @@ async def get_all_my_messages(access_token: str, offset: int = 0, limit: int = 0
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
-    msg_data = await conn.read_all_msg(db=db, user_type=user_type, lang=lang, user_id=user_id[0][0], offset=offset,
+    msg_data = await conn.read_all_msg(db=db, user_id=user_id[0][0], offset=offset,
                                        limit=limit)
-    count = await conn.count_msg(db=db, user_type=user_type, lang=lang, user_id=user_id[0][0])
+    count = await conn.count_msg(db=db, user_id=user_id[0][0])
     msg_list = []
 
     for _msg_data in msg_data:

@@ -7,14 +7,10 @@ get_me_res = {
                     "odd": {
                         "summary": "Success",
                         "value": {"ok": True,
-                                  'user_id': 12,
-                                  'name': 'Anna',
-                                  'surname': 'Volkova',
-                                  'phone': 321161666,
-                                  'email': 'anna@gmail.com',
-                                  'status': 'creator',
-                                  'last_active': '2023-01-17 21:54:23.738397',
-                                  }
+                                  'count': 22,
+                                  'msg_list': [
+                                      {}
+                                  ]}
                     },
                 }
             }
