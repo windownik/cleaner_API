@@ -20,11 +20,6 @@ pipeline {
                 sh 'ls'
             }
         }
-        stage("step stop docker images") {
-            steps {
-                sh 'docker-compose down'
-            }
-        }
         stage("step delete images") {
             steps {
                 sh 'docker rmi $(docker images -q)'
