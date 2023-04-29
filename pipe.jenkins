@@ -21,8 +21,14 @@ pipeline {
             }
         }
         stage('Prune Docker data') {
+          steps {
+            sh 'docker system prune -a --volumes -f'
+          }
+        }
+        stage('Rework Docker containers') {
             steps {
-                sh 'docker-compose up --force-recreate'
+                sh 'docker compose up -d --no-color --wait'
+                sh 'docker compose ps'
             }
         }
     }
