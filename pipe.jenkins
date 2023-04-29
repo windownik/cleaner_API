@@ -20,11 +20,6 @@ pipeline {
                 sh 'ls'
             }
         }
-        stage("step down images") {
-            steps {
-                sh 'docker-compose down'
-            }
-        }
         stage("step up build docker") {
             steps {
                 sh 'docker-compose up --build'
