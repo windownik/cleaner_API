@@ -20,11 +20,6 @@ pipeline {
                 sh 'ls'
             }
         }
-        stage("step git pull") {
-            steps {
-                sh 'git pull'
-            }
-        }
         stage("step down images") {
             steps {
                 sh 'docker-compose down'
