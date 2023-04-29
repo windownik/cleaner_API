@@ -34,17 +34,16 @@ async def create_new_messages(access_token: str, to_user_id: int, title: str, te
     Use this route for creating new message
 
 
-    :param description: short text\n
-    :param text: main text of message\n
-    :param title: title of message\n
-    :param msg_id: id of new document or another main document. Send 0 if only text message\n
-    :param access_token: user's access token in our service\n
-    :param to_user_id: user_id for personal msg sending for all users send value 0\n
-    :param user_type: can be 'user', 'admin', 'all'\n
-    :param push: Send True for sending push notification\n
-    :param lang: Can be 'en', 'ru', 'he'\n
-    :param msg_type: Can be 'text', 'new_user', 'new_deal'\n
-    :return: dict\n
+    description: short text\n
+    text: main text of message\n
+    title: title of message\n
+    msg_id: id of new document or another main document. Send 0 if only text message\n
+    access_token: user's access token in our service\n
+    to_user_id: user_id for personal msg sending for all users send value 0\n
+    user_type: can be 'user', 'admin', 'all'\n
+    push: Send True for sending push notification\n
+    lang: Can be 'en', 'ru', 'he'\n
+    msg_type: Can be 'text', 'new_user', 'new_deal'\n
     """
     from_id = await conn.get_token(db=db, token_type='access', token=access_token)
     if not from_id:

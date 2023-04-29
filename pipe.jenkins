@@ -1,0 +1,41 @@
+#!groovy
+// Start work
+properties([disableConcurrentBuilds()])
+
+pipeline {
+    agent {
+        label 'master'
+        }
+    triggers { pollSCM('* * * * *') }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '2'))
+        timestamps()
+    }
+    stages {
+        stage("step connect to server") {
+            steps {
+                sh 'ssh root@185.51.247.27 \'cd cleaner/cleaner_API\''
+            }
+        }
+        stage("step stop docker images") {
+            steps {
+                sh 'docker-compose down'
+            }
+        }
+        stage("step delete images") {
+            steps {
+                sh 'docker rmi $(docker images -q)'
+            }
+        }
+        stage("step git pull") {
+            steps {
+                sh 'git pull'
+            }
+        }
+        stage("step up build docker") {
+            steps {
+                sh 'docker-compose up --build'
+            }
+        }
+    }
+}
