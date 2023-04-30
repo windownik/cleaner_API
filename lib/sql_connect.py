@@ -78,8 +78,10 @@ async def create_work_type_table(db):
  name_en TEXT DEFAULT 'room',
  name_heb TEXT DEFAULT 'room'
  )''')
-    object_types = ((1, 'Квартира', 'Apartment', 'דִירָה'), (2, 'Дом', 'House', 'בַּיִת'),
-                    (3, 'Офис', 'Office', 'מִשׂרָד'), (4, 'Легковой автомобиль', 'Car', 'מכונית'))
+    object_types = ((1, 'Убираю квартиры', 'I clean apartments', 'I clean apartments'),
+                    (2, 'Убираю дома', 'I clean houses', 'I clean houses'),
+                    (3, 'Убираю офисы', 'I clean offices', 'I clean offices'),
+                    (4, 'Убираю легковые автомобили', 'Clean up cars', 'Clean up cars'))
     for i in object_types:
         await db.execute(f"INSERT INTO object_type (id, name_ru, name_en, name_heb) "
                          f"VALUES ($1, $2, $3, $4) "

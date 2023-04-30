@@ -169,13 +169,6 @@ class Message:
 
 
 class UsersWork(BaseModel):
-    # work_id: int = 0
-    # work_type: str = ''
-    # object_id: int = 0
-    # object_name_ru: str = ''
-    # object_name_en: str = ''
-    # object_name_he: str = ''
-    # object_size: int = 0
     work_id: int
     work_type: str
     object_id: int
@@ -183,14 +176,3 @@ class UsersWork(BaseModel):
     object_name_en: str
     object_name_he: str
     object_size: int
-    #
-    # def from_db(self, data: dict):
-    #     self.work_id = data['work_id']
-    #     self.work_type = data['work_type']
-    #     self.object_id = data['object_id']
-    #     self.object_name_ru = data['object_name_ru']
-    #     self.object_name_en = data['object_name_en']
-    #     self.object_name_he = data['object_name_he']
-    #     self.object_size = data['object_size']
-
-
