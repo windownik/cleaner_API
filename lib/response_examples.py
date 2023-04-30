@@ -161,6 +161,35 @@ update_user_profession_res = {
     },
 }
 
+get_user_profession_list_res = {
+    200: {
+        "description": "Success",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "odd": {
+                        "summary": "Success",
+                        "value": {"ok": True,
+                                  'users_work_list': [
+                                      {
+                                          "work_id": 1,
+                                          "work_type": "clean",
+                                          "object_id": 1,
+                                          "object_name_ru": "Квартира",
+                                          "object_name_en": "Apartment",
+                                          "object_name_he": "דִירָה",
+                                          "object_size": 1
+                                      }
+
+                                  ]
+                                  }
+                    },
+                }
+            }
+        }
+    },
+}
+
 login_get_res = {
     200: {
         "description": "Success",

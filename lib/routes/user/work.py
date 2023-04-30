@@ -59,21 +59,21 @@ async def update_user_profession(work_list: str, access_token: str, db=Depends(d
                         )
 
 
-@app.get(path='/user_profession', tags=['Work'], responses=update_user_profession_res)
+@app.get(path='/user_profession', tags=['Work'], responses=get_user_profession_list_res)
 async def get_user_profession_list(access_token: str, user_id: int = 0, db=Depends(data_b.connection)):
     """
     Get user's profession information.\n
     user_id: is integer number from object_list\n
     """
     if user_id == 0:
-        owner_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
+        owner_id = await conn.get_token(db=db, token_type='access', token=access_token)
         if not owner_id:
             return JSONResponse(content="bad access token or haven't of access rights",
                                 status_code=_status.HTTP_401_UNAUTHORIZED)
         user_id = owner_id[0][0]
 
     else:
-        owner_id = await conn.get_token(db=db, token_type='access', token=access_token)
+        owner_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
         if not owner_id:
             return JSONResponse(content="bad access token",
                                 status_code=_status.HTTP_401_UNAUTHORIZED)
@@ -81,11 +81,10 @@ async def get_user_profession_list(access_token: str, user_id: int = 0, db=Depen
     work_data = await conn.read_users_work(db=db, user_id=user_id)
     users_work_list = []
     for work in work_data:
-        user_work = UsersWork.parse_raw(work)
-        users_work_list.append(user_work.json())
+        user_work = UsersWork.parse_obj(work)
+        users_work_list.append(user_work.dict())
 
     return JSONResponse(content={"ok": True,
-                                 'description': 'all is work',
                                  'users_work_list': users_work_list
                                  },
                         status_code=_status.HTTP_200_OK,
