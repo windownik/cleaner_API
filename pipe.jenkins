@@ -20,7 +20,7 @@ pipeline {
                 sh 'ls'
             }
         }
-        stage('Prune Docker data') {
+        stage('Docker Down and delete') {
           steps {
             sh 'docker-compose down'
             sh 'docker rmi $(docker images -q)'

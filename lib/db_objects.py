@@ -1,6 +1,7 @@
 import datetime
 
 from fastapi import Depends
+from pydantic import BaseModel
 
 from lib.sql_connect import create_user
 
@@ -165,3 +166,14 @@ class Message:
             'deleted_date': str(self.deleted_date),
             'create_date': str(self.create_date)
         }
+
+
+class UsersWork(BaseModel):
+    work_id: int
+    work_type: str
+    object_id: int
+    object_name_ru: str
+    object_name_en: str
+    object_name_he: str
+    object_size: int
+

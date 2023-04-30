@@ -6,6 +6,7 @@ from fastapi import Depends
 from starlette.responses import JSONResponse
 
 from lib import sql_connect as conn
+from lib.db_objects import UsersWork
 from lib.response_examples import *
 from lib.sql_connect import data_b, app
 
@@ -53,6 +54,40 @@ async def update_user_profession(work_list: str, access_token: str, db=Depends(d
                             status_code=_status.HTTP_400_BAD_REQUEST)
     return JSONResponse(content={"ok": True,
                                  'description': 'users work list updated'},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'}
+                        )
+
+
+@app.get(path='/user_profession', tags=['Work'], responses=update_user_profession_res)
+async def get_user_profession_list(access_token: str, user_id: int = 0, db=Depends(data_b.connection)):
+    """
+    Get user's profession information.\n
+    user_id: is integer number from object_list\n
+    """
+    if user_id == 0:
+        owner_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
+        if not owner_id:
+            return JSONResponse(content="bad access token or haven't of access rights",
+                                status_code=_status.HTTP_401_UNAUTHORIZED)
+        user_id = owner_id[0][0]
+
+    else:
+        owner_id = await conn.get_token(db=db, token_type='access', token=access_token)
+        if not owner_id:
+            return JSONResponse(content="bad access token",
+                                status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    work_data = await conn.read_users_work(db=db, user_id=user_id)
+    users_work_list = []
+    for work in work_data:
+        user_work = UsersWork.parse_raw(work)
+        users_work_list.append(user_work.json())
+
+    return JSONResponse(content={"ok": True,
+                                 'description': 'all is work',
+                                 'users_work_list': users_work_list
+                                 },
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'}
                         )

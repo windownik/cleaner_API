@@ -185,6 +185,16 @@ async def read_data(db: Depends, table: str, id_name: str, id_data, name: str = 
     return data
 
 
+# получаем данные с одним фильтром
+async def read_users_work(db: Depends, user_id: int):
+    data = await db.fetch(f"SELECT work.id as work_id, work.work_type, work.object_id, work.object_size, "
+                          f"object_type.name_ru as object_name_ru, "
+                          f"object_type.name_en as object_name_en, "
+                          f"object_type.name_heb as object_name_he, FROM work JOIN object_type "
+                          f"ON work.object_id = object_type.id WHERE work.user_id = $1;", user_id)
+    return data
+
+
 # получаем данные без фильтров
 async def read_all(db: Depends, table: str, name: str = '*'):
     data = await db.fetch(f"SELECT {name} FROM {table};")
