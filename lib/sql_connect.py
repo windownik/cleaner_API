@@ -203,20 +203,6 @@ async def read_all(db: Depends, table: str, name: str = '*'):
     return data
 
 
-# получаем данные без фильтров
-async def count_msg(db: Depends, user_id: int):
-    data = await db.fetch(f"SELECT COUNT(id) FROM message_line "
-                          f"WHERE (to_id=$1 OR (to_id=0 AND user_type='admin'));", user_id)
-    return data
-
-
-# получаем данные без фильтров
-async def count_msg_user(db: Depends, user_id: int):
-    data = await db.fetch(f"SELECT COUNT(id) FROM message_line "
-                          f"WHERE to_id=$1 AND status='created';", user_id)
-    return data
-
-
 # получаем все новые сообщения для пользователя с id
 async def read_all_msg(db: Depends, user_id: int, offset: int = 0, limit: int = 0, ):
 
@@ -227,6 +213,21 @@ async def read_all_msg(db: Depends, user_id: int, offset: int = 0, limit: int = 
     data = await db.fetch(f"SELECT * FROM message_line "
                           f"WHERE (to_id=$1 OR (to_id=0 AND user_type='admin')) "
                           f"AND status='created' ORDER BY id{offset_limit};", user_id)
+    return data
+
+
+# получаем данные без фильтров
+async def count_msg(db: Depends, user_id: int):
+    data = await db.fetch(f"SELECT COUNT(id) FROM message_line "
+                          f"WHERE (to_id=$1 OR (to_id=0 AND user_type='admin')) AND status='created';",
+                          user_id)
+    return data
+
+
+# получаем данные без фильтров
+async def count_msg_user(db: Depends, user_id: int):
+    data = await db.fetch(f"SELECT COUNT(id) FROM message_line "
+                          f"WHERE to_id=$1 AND status='created';", user_id)
     return data
 
 
