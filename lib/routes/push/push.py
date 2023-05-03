@@ -59,9 +59,24 @@ async def user_update_push_token(access_token: str, push_token: str, db=Depends(
 
 
 @app.put(path='/sending_push', tags=['Push'], responses=update_push_res)
-async def start_sending_push_msg(access_token: str, title: str, message: str, db=Depends(data_b.connection)):
+async def start_sending_push_msg(access_token: str, lang: str, content_type: int, users_account_type: str,
+                                 title: str, short_text: str, main_text: str = None, url: str = None,
+                                 db=Depends(data_b.connection)):
+    """
+
+    access_token: users token\n
+    lang: users language filter can be: ru, en, he\n
+    content_type: can be: 0 for text and 1 for img\n
+    users_account_type: can be: worker, customer, all\n
+    title: Tittle of message\n
+    short_text: short text of push message\n
+    main_text: main text of message for content type 0\n
+    url: url to img in internet for content type 0\n
+    """
     admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
     if not admin_id:
         return JSONResponse(content={"ok": False,
                                      'description': "bad access token or not enough rights"},
                             status_code=_status.HTTP_401_UNAUTHORIZED)
+
+

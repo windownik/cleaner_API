@@ -102,6 +102,22 @@ async def create_files_table(db):
 
 
 # Создаем новую таблицу
+# Таблица для записи статей информации о файлах
+async def create_sending_table(db):
+    await db.execute(f'''CREATE TABLE IF NOT EXISTS sending (
+ id SERIAL PRIMARY KEY,
+ user_id INTEGER DEFAULT 0,
+ title TEXT DEFAULT '0',
+ short_text TEXT DEFAULT '0',
+ main_text TEXT DEFAULT '0',
+ img_url TEXT DEFAULT '0',
+ push_type TEXT DEFAULT 'text',
+ status TEXT DEFAULT 'created',
+ create_date timestamp
+ )''')
+
+
+# Создаем новую таблицу
 # Таблица для записи всех видов сообщений для всех пользователей
 async def create_msg_line_table(db):
     await db.execute(f'''CREATE TABLE IF NOT EXISTS message_line (
