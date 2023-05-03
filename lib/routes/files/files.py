@@ -65,18 +65,26 @@ async def get_files_by_line(file_id_line: str, db=Depends(data_b.connection)):
 
 @app.post(path='/file_upload', tags=['For all'], responses=upload_files_res)
 async def download_file(file: UploadFile, access_token: str, db=Depends(data_b.connection), ):
-    """Get all company in database"""
-    user_id = (await conn.get_token(db=db, token_type='access', token=access_token))[0][0]
-
-    if file.filename.split('.')[1] == 'jpg':
+    """
+    Upload file to server\n
+    file_type in response: .jpg and . png is image,\n
+    .xlsx and .doc is ms_doc,\n
+    other files get type file
+    """
+    # user_id = (await conn.get_token(db=db, token_type='access', token=access_token))[0][0]
+    user_id = 1
+    if file.filename.split('.')[1] == 'jpg' or file.filename.split('.')[1] == 'png':
         file_path = f'files/img/'
         file_type = 'image'
-    elif file.filename.split('.')[1] == 'xlsx':
+    elif file.filename.split('.')[1] == 'xlsx' or file.filename.split('.')[1] == 'doc':
+        file_path = f'files/ms_doc/'
+        file_type = 'ms_doc'
+    elif file.filename.split('.')[1] == 'txt' or file.filename.split('.')[1] == 'pdf':
         file_path = f'files/docs/'
-        file_type = 'excel'
+        file_type = 'document'
     else:
-        file_path = f'files/docs/'
-        file_type = 'doc'
+        file_path = f'files/file/'
+        file_type = 'file'
     file_id = (await conn.save_new_file(db=db, file_name=file.filename, file_path=file_path, owner_id=user_id,
                                         file_type=file_type))[0][0]
     filename = f"{file_id}.{file.filename.split('.')[1]}"
