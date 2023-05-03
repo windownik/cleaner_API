@@ -26,7 +26,7 @@ async def initialization(connect):
 async def send_push_notification(access_token: str, user_id: int, title: str, push_body: str, push_type: str,
                                  main_text: str = '0', db=Depends(data_b.connection)):
     """
-    Send push notifi cations
+    Send push notifications
     user_id - id of user for sending push\n
     title - Title of push\n
     push_body - Text body of push message\n
@@ -46,7 +46,7 @@ async def send_push_notification(access_token: str, user_id: int, title: str, pu
 
 
 @app.put(path='/update_push', tags=['Push'], responses=update_push_res)
-async def find_phone_in_db(access_token: str, push_token: str, db=Depends(data_b.connection)):
+async def user_update_push_token(access_token: str, push_token: str, db=Depends(data_b.connection)):
     """Update users push token in database"""
     user_id = await conn.get_token(db=db, token_type='access', token=access_token)
     if not user_id:
@@ -56,3 +56,12 @@ async def find_phone_in_db(access_token: str, push_token: str, db=Depends(data_b
 
     return JSONResponse(content={'ok': True, 'desc': 'successfully updated'},
                         headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.put(path='/sending_push', tags=['Push'], responses=update_push_res)
+async def start_sending_push_msg(access_token: str, title: str, message: str, db=Depends(data_b.connection)):
+    admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
+    if not admin_id:
+        return JSONResponse(content={"ok": False,
+                                     'description': "bad access token or not enough rights"},
+                            status_code=_status.HTTP_401_UNAUTHORIZED)
