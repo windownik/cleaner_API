@@ -63,7 +63,7 @@ async def start_sending_push_msg(access_token: str, lang: str, content_type: int
                                  title: str, short_text: str, main_text: str = None, url: str = None,
                                  db=Depends(data_b.connection)):
     """
-    Use it route for create massive sending message\n\n
+    Use it route for create massive sending message for users with filter\n\n
     access_token: users token\n
     lang: users language filter can be: ru, en, he, all\n
     content_type: can be: 0 for text and 1 for img\n
