@@ -1,33 +1,33 @@
 version: "3.6"
 services:
-  db:
-    image: postgres:13
-    environment:
-      POSTGRES_PASSWORD: 102015
-    volumes:
-      - db:/var/lib/postgresql/data
-    ports:
-      - "5444:5432"
+#  db:
+#    image: postgres:13
+#    environment:
+#      POSTGRES_PASSWORD: 102015
+#    volumes:
+#      - db:/var/lib/postgresql/data
+#    ports:
+#      - "5444:5432"
   api:
     build: .
     environment:
       IP_SERVER: "185.51.247.27"
       PORT_SERVER: 10010
 
-      DATABASE_USER: postgres
-      DATABASE_PASS: 102015
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_NAME: postgres
+#      DATABASE_USER: postgres
+#      DATABASE_PASS: 102015
+#      DATABASE_HOST: db
+#      DATABASE_PORT: 5432
+#      DATABASE_NAME: postgres
     volumes:
       - ./:/main
     ports:
       - "10020:10020"
 
-    links:
-      - db
-    depends_on:
-      - db
+#    links:
+#      - db
+#    depends_on:
+#      - db
 
-volumes:
-  db:
+#volumes:
+#  db:
