@@ -1,8 +1,6 @@
 FROM python:3.10
 
-WORKDIR /main/
 
-COPY . /main/
 
 ENV TZ=Europe/Moscow
 RUN apt-get update && apt-get install -yy tzdata
@@ -19,5 +17,7 @@ RUN pip3 install fastapi-asyncpg
 RUN pip3 install python-multipart
 RUN pip3 install firebase-admin
 
+WORKDIR /main/
+COPY . /main/
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10020"]
