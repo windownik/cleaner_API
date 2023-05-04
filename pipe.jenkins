@@ -23,7 +23,7 @@ pipeline {
         stage('Docker Down and delete') {
           steps {
             sh 'docker-compose down'
-            sh 'docker rmi $(docker images -q)'
+            sh 'docker rmi -f $(docker images -q)'
           }
         }
         stage('Rework Docker containers') {
