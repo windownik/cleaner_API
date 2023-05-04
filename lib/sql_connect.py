@@ -112,8 +112,7 @@ async def create_sending_table(db):
  main_text TEXT DEFAULT '0',
  img_url TEXT DEFAULT '0',
  push_type TEXT DEFAULT 'text',
- status TEXT DEFAULT 'created',
- create_date timestamp
+ status TEXT DEFAULT 'created'
  )''')
 
 
@@ -197,6 +196,28 @@ async def save_new_file(db: Depends, file_name: str, file_path: str, file_type: 
     return file_id
 
 
+# Создаем много новых записей в таблице рассылки
+async def save_push_to_sending(db: Depends, users_id: list, title: str, short_text: str, main_text: str, img_url: str,
+                               push_type: str):
+    for user_id in users_id:
+
+        sql = f"INSERT INTO sending (user_id, title, short_text, main_text, img_url, push_type) " \
+              f"VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING;"
+        await db.fetch(sql, user_id[0], title, short_text, main_text, img_url, push_type)
+
+
+# Создаем много новых записей в таблице рассылки
+async def msg_to_many_users(db: Depends, users_id: list, msg_type: str, title: str, short_text: str, description: str,
+                            from_id: int):
+    now = datetime.datetime.now()
+    for user_id in users_id:
+
+        await db.fetch(f"INSERT INTO message_line (msg_type, title, text, description, from_id, to_id, "
+                       f"user_type, create_date) "
+                       f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING;", msg_type, title, short_text,
+                       description, from_id, user_id[0], 'user', now)
+
+
 # получаем данные с одним фильтром
 async def read_data(db: Depends, table: str, id_name: str, id_data, name: str = '*'):
     data = await db.fetch(f"SELECT {name} FROM {table} WHERE {id_name} = $1;", id_data)
@@ -213,6 +234,22 @@ async def read_users_work(db: Depends, user_id: int):
     return data
 
 
+# получаем пользователей для рассылки с фильтрацией
+async def get_users_for_push(db: Depends, lang: str, users_account_type: str, ):
+    sql_where = ''
+    if lang in ('ru', 'en', 'he'):
+        sql_where = f"AND lang = '{lang}' "
+
+    if users_account_type in ('worker', 'customer'):
+        sql_where = f"{sql_where}AND status = '{users_account_type}'"
+
+    if sql_where != '':
+        sql_where = f" WHERE {sql_where[4:]}"
+
+    data = await db.fetch(f"SELECT user_id FROM all_users{sql_where};")
+    return data
+
+
 # получаем данные без фильтров
 async def read_all(db: Depends, table: str, name: str = '*'):
     data = await db.fetch(f"SELECT {name} FROM {table};")
@@ -221,7 +258,6 @@ async def read_all(db: Depends, table: str, name: str = '*'):
 
 # получаем все новые сообщения для пользователя с id
 async def read_all_msg(db: Depends, user_id: int, offset: int = 0, limit: int = 0, ):
-
     offset_limit = ''
 
     if offset != 0 or limit != 0:
@@ -249,7 +285,6 @@ async def count_msg_user(db: Depends, user_id: int):
 
 # получаем все новые сообщения для пользователя с id
 async def read_all_msg_user(db: Depends, user_id: int, user_type: str, offset: int = 0, limit: int = 0, ):
-
     offset_limit = ''
 
     if offset != 0 and limit != 0:

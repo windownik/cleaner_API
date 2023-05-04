@@ -58,14 +58,14 @@ async def user_update_push_token(access_token: str, push_token: str, db=Depends(
                         headers={'content-type': 'application/json; charset=utf-8'})
 
 
-@app.put(path='/sending_push', tags=['Push'], responses=update_push_res)
+@app.post(path='/sending_push', tags=['Push'], responses=update_push_res)
 async def start_sending_push_msg(access_token: str, lang: str, content_type: int, users_account_type: str,
                                  title: str, short_text: str, main_text: str = None, url: str = None,
                                  db=Depends(data_b.connection)):
     """
 
     access_token: users token\n
-    lang: users language filter can be: ru, en, he\n
+    lang: users language filter can be: ru, en, he, all\n
     content_type: can be: 0 for text and 1 for img\n
     users_account_type: can be: worker, customer, all\n
     title: Tittle of message\n
@@ -73,10 +73,47 @@ async def start_sending_push_msg(access_token: str, lang: str, content_type: int
     main_text: main text of message for content type 0\n
     url: url to img in internet for content type 0\n
     """
+
+    if lang not in ('ru', 'en', 'he', 'he', 'all'):
+        return JSONResponse(content={"ok": False,
+                                     'description': "Bad language"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    if content_type not in (0, 1):
+        return JSONResponse(content={"ok": False,
+                                     'description': "Content type not valid"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    if users_account_type not in ('worker', 'customer', 'all'):
+        return JSONResponse(content={"ok": False,
+                                     'description': "Bad users account type"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
     admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
     if not admin_id:
         return JSONResponse(content={"ok": False,
                                      'description': "bad access token or not enough rights"},
                             status_code=_status.HTTP_401_UNAUTHORIZED)
 
+    users_id = await conn.get_users_for_push(db=db, lang=lang, users_account_type=users_account_type)
+    if content_type == 0:
+        push_type = 'text'
+    else:
+        push_type = 'img'
 
+    description = '0'
+    if main_text is not None:
+        description = main_text
+    elif url is not None:
+        description = url
+
+    await conn.save_push_to_sending(db=db, users_id=users_id, title=title, short_text=short_text,
+                                    main_text=main_text if main_text is not None else '0',
+                                    push_type=push_type,
+                                    img_url=url if url is not None else '0')
+
+    await conn.msg_to_many_users(db=db, users_id=users_id, title=title, short_text=short_text,
+                                 description=description, from_id=1, msg_type=push_type)
+
+    return JSONResponse(content={'ok': True, 'desc': 'successfully created'},
+                        headers={'content-type': 'application/json; charset=utf-8'})
