@@ -23,7 +23,7 @@ services:
       - ./:/main
     ports:
       - "10020:10020"
-
+    network_mode: "host"
 #    links:
 #      - db
 #    depends_on:
