@@ -28,8 +28,7 @@ pipeline {
         }
         stage('Rework Docker containers') {
             steps {
-                // sh 'docker compose up --build --no-color --wait'
-                sh 'docker compose up --build'
+                sh 'docker compose up --build --no-color --wait'
                 sh 'docker compose ps'
             }
         }
