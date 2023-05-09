@@ -64,14 +64,14 @@ async def get_files_by_line(file_id_line: str, db=Depends(data_b.connection)):
 
 @app.post(path='/file_upload', tags=['For all'], responses=upload_files_res)
 async def download_file(file: UploadFile, access_token: str, db=Depends(data_b.connection), ):
-    f"""
+    """
     Upload file to server\n
     file_type in response: .jpg and . png is image,\n
     .xlsx and .doc is ms_doc,\n
     other files get type file
-    {ip_server}:{ip_port}
     """
     user_id = (await conn.get_token(db=db, token_type='access', token=access_token))[0][0]
+    # user_id = 1
     if file.filename.split('.')[1] == 'jpg' or file.filename.split('.')[1] == 'png':
         file_path = f'files/img/'
         file_type = 'image'
