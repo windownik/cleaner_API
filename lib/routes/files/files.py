@@ -58,7 +58,6 @@ async def get_files_by_line(file_id_line: str, db=Depends(data_b.connection)):
                 'url': f"http://{ip_server}:{ip_port}/file_download?file_id={file_id}"
             }
         )
-
     return JSONResponse(content={"ok": True, 'desc': "all file list by file line", 'files': files_list},
                         headers={'content-type': 'application/json; charset=utf-8'})
 
