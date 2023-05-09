@@ -38,9 +38,3 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-if __name__ == '__main__':
-    app.state.pgpool = asyncpg.create_pool()
-    uvicorn.run("main:app",
-                host=ip_server,
-                port=int(ip_port),
-                reload=True)
