@@ -5,7 +5,7 @@ services:
     build: .
     environment:
       IP_SERVER: "185.51.247.27"
-      PORT_SERVER: 10010
+      PORT_SERVER: 10020
 
     volumes:
       - ./:/main
