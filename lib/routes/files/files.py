@@ -90,6 +90,7 @@ async def download_file(file: UploadFile, access_token: str, db=Depends(data_b.c
     await conn.update_data(table='files', name='file_path', data=f"{file_path}{filename}",
                            id_data=file_id, db=db)
     b = file.file.read()
+
     f = open(f"{file_path}{filename}", 'wb')
     f.write(b)
     f.close()
