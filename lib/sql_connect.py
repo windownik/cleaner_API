@@ -138,6 +138,32 @@ async def create_msg_line_table(db):
 
 
 # Создаем новую таблицу
+# Таблица для записи всех видов сообщений для всех пользователей
+async def create_order_table(db):
+    await db.execute(f'''CREATE TABLE IF NOT EXISTS order (
+ order_id SERIAL PRIMARY KEY,
+ creator_id INTEGER DEFAULT 0,
+ worker_id INTEGER DEFAULT 0,
+ city TEXT DEFAULT '0',
+ street TEXT DEFAULT '0',
+ house TEXT DEFAULT '0',
+ longitudes DOUBLE PRECISION,
+ latitudes DOUBLE PRECISION,
+ object_type_id TEXT DEFAULT '0',
+ object_type_name_ru TEXT DEFAULT '0',
+ object_type_name_en TEXT DEFAULT '0',
+ object_type_name_he TEXT DEFAULT '0',
+ object_size INTEGER DEFAULT 0,
+ comment TEXT DEFAULT '0',
+ status TEXT DEFAULT 'created',
+ review TEXT DEFAULT 'created',
+ score INTEGER DEFAULT 0,
+ start_work timestamp,
+ create_date timestamp
+ )''')
+
+
+# Создаем новую таблицу
 async def create_user(db: Depends, phone, email, name, auth_type, auth_id, description, lang, city, street, house,
                       status, longitudes, latitudes, image_link: str):
     now = datetime.datetime.now()

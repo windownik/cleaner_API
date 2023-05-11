@@ -176,3 +176,29 @@ class UsersWork(BaseModel):
     object_name_en: str
     object_name_he: str
     object_size: int
+
+
+class OrderAddress(BaseModel):
+    city: str
+    street: str
+    house: str
+    latitudes: float  # Широта
+    longitudes: float  # Долгота
+
+
+class Order(BaseModel):
+    order_id: int
+    creator_id: int
+    worker_id: int
+    address: OrderAddress
+    object_type_id: int
+    object_name_ru: str
+    object_name_en: str
+    object_name_he: str
+    object_size: int
+    comment: str
+    status: str
+    review: str
+    score: int
+    start_work: datetime.datetime
+    create_work: datetime.datetime
