@@ -225,11 +225,17 @@ async def save_new_file(db: Depends, file_name: str, file_path: str, file_type: 
 
 
 # Создаем новую запись в базе данных
-async def save_new_file(db: Depends, file_name: str, file_path: str, file_type: str, owner_id: int):
+async def write_order(db: Depends, creator_id, city, street, house, longitudes,
+                             latitudes, now, object_type_id, object_type_name_ru, object_type_name_en,
+                             object_type_name_he, object_size, comment, start_work,):
     now = datetime.datetime.now()
-    file_id = await db.fetch(f"INSERT INTO files (file_name, file_path, file_type, owner_id, create_date) "
-                             f"VALUES ($1, $2, $3, $4, $5) "
-                             f"ON CONFLICT DO NOTHING RETURNING id;", file_name, file_path, file_type, owner_id, now)
+    file_id = await db.fetch(f"INSERT INTO orders (creator_id, city, street, house, longitudes, latitudes, "
+                             f"object_type_id, object_type_name_ru, object_type_name_en, object_type_name_he, "
+                             f"object_size, comment, start_work, create_date) "
+                             f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) "
+                             f"ON CONFLICT DO NOTHING RETURNING order_id;", creator_id, city, street, house, longitudes,
+                             latitudes, now, object_type_id, object_type_name_ru, object_type_name_en,
+                             object_type_name_he, object_size, comment, start_work, now)
     return file_id
 
 
