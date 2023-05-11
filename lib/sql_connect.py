@@ -224,6 +224,15 @@ async def save_new_file(db: Depends, file_name: str, file_path: str, file_type: 
     return file_id
 
 
+# Создаем новую запись в базе данных
+async def save_new_file(db: Depends, file_name: str, file_path: str, file_type: str, owner_id: int):
+    now = datetime.datetime.now()
+    file_id = await db.fetch(f"INSERT INTO files (file_name, file_path, file_type, owner_id, create_date) "
+                             f"VALUES ($1, $2, $3, $4, $5) "
+                             f"ON CONFLICT DO NOTHING RETURNING id;", file_name, file_path, file_type, owner_id, now)
+    return file_id
+
+
 # Создаем много новых записей в таблице рассылки
 async def save_push_to_sending(db: Depends, users_id: list, title: str, short_text: str, main_text: str, img_url: str,
                                push_type: str):
