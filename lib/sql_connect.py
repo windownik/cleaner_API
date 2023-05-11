@@ -156,8 +156,10 @@ async def create_order_table(db):
  object_size INTEGER DEFAULT 0,
  comment TEXT DEFAULT '0',
  status TEXT DEFAULT 'created',
- review TEXT DEFAULT 'created',
+ review_status TEXT DEFAULT 'created',
+ review_text TEXT DEFAULT '0',
  score INTEGER DEFAULT 0,
+ review_date timestamp,
  start_work timestamp,
  create_date timestamp
  )''')

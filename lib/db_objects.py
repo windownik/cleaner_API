@@ -186,6 +186,15 @@ class OrderAddress(BaseModel):
     longitudes: float  # Долгота
 
 
+class Review(BaseModel):
+    order_id: int
+    worker_id: int
+    review_text: str
+    score: int
+    review_status: str
+    review_date: datetime.datetime
+
+
 class Order(BaseModel):
     order_id: int
     creator_id: int
@@ -198,7 +207,6 @@ class Order(BaseModel):
     object_size: int
     comment: str
     status: str
-    review: str
-    score: int
+    review: Review
     start_work: datetime.datetime
     create_work: datetime.datetime
