@@ -140,7 +140,7 @@ async def create_msg_line_table(db):
 # Создаем новую таблицу
 # Таблица для записи всех видов сообщений для всех пользователей
 async def create_order_table(db):
-    await db.execute(f'''CREATE TABLE IF NOT EXISTS order (
+    await db.execute(f'''CREATE TABLE IF NOT EXISTS orders (
  order_id SERIAL PRIMARY KEY,
  creator_id INTEGER DEFAULT 0,
  worker_id INTEGER DEFAULT 0,
