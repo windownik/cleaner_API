@@ -5,4 +5,5 @@ from lib.routes.files import files
 from lib.routes.user import work
 from lib.routes.push import push
 from lib.routes.admin import admin_users
+from lib.routes.orders import orders
 

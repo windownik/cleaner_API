@@ -486,3 +486,20 @@ get_msg_by_id_res = {
         }
     },
 }
+
+create_get_order_res = {
+    200: {
+        "description": "Success",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "odd": {
+                        "summary": "Success",
+                        "value": {"ok": True,
+                                  'order': {'order_id': 1}}
+                    },
+                }
+            }
+        }
+    },
+}

@@ -225,25 +225,24 @@ async def save_new_file(db: Depends, file_name: str, file_path: str, file_type: 
 
 
 # Создаем новую запись в базе данных
-async def write_order(db: Depends, creator_id, city, street, house, longitudes,
-                             latitudes, now, object_type_id, object_type_name_ru, object_type_name_en,
-                             object_type_name_he, object_size, comment, start_work,):
+async def write_order(db: Depends, creator_id: int, city: str, street: str, house: str, longitudes: float,
+                      latitudes: float, object_type_id: int, object_type_name_ru: str, object_type_name_en: str,
+                      object_type_name_he: str, object_size: int, comment: str, start_work: datetime.datetime):
     now = datetime.datetime.now()
-    file_id = await db.fetch(f"INSERT INTO orders (creator_id, city, street, house, longitudes, latitudes, "
-                             f"object_type_id, object_type_name_ru, object_type_name_en, object_type_name_he, "
-                             f"object_size, comment, start_work, create_date) "
-                             f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) "
-                             f"ON CONFLICT DO NOTHING RETURNING order_id;", creator_id, city, street, house, longitudes,
-                             latitudes, now, object_type_id, object_type_name_ru, object_type_name_en,
-                             object_type_name_he, object_size, comment, start_work, now)
-    return file_id
+    order = await db.fetch(f"INSERT INTO orders (creator_id, city, street, house, longitudes, latitudes, "
+                           f"object_type_id, object_type_name_ru, object_type_name_en, object_type_name_he, "
+                           f"object_size, comment, start_work, create_date) "
+                           f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) "
+                           f"ON CONFLICT DO NOTHING RETURNING *;", creator_id, city, street, house, longitudes,
+                           latitudes, object_type_id, object_type_name_ru, object_type_name_en,
+                           object_type_name_he, object_size, comment, start_work, now)
+    return order
 
 
 # Создаем много новых записей в таблице рассылки
 async def save_push_to_sending(db: Depends, users_id: list, title: str, short_text: str, main_text: str, img_url: str,
                                push_type: str):
     for user_id in users_id:
-
         sql = f"INSERT INTO sending (user_id, title, short_text, main_text, img_url, push_type) " \
               f"VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING;"
         await db.fetch(sql, user_id[0], title, short_text, main_text, img_url, push_type)
@@ -254,7 +253,6 @@ async def msg_to_many_users(db: Depends, users_id: list, msg_type: str, title: s
                             from_id: int):
     now = datetime.datetime.now()
     for user_id in users_id:
-
         await db.fetch(f"INSERT INTO message_line (msg_type, title, text, description, from_id, to_id, "
                        f"user_type, create_date) "
                        f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING;", msg_type, title, short_text,
@@ -373,6 +371,19 @@ async def get_token_admin(db: Depends, token_type: str, token: str):
     if not status:
         return
     return user_id
+
+
+# Обновляем заказ
+async def update_order(db: Depends, order_id: int, city: str, street: str, house: str, longitudes: float,
+                       latitudes: float, object_type_id: int, object_type_name_ru: str, object_type_name_en: str,
+                       object_type_name_he: str, object_size: int, comment: str, start_work: datetime.datetime):
+    return await db.fetch(f"UPDATE orders SET city=$1, street=$2, house=$3, longitudes=$4, latitudes=$5, "
+                         f"object_type_id=$6, object_type_name_ru=$7, object_type_name_en=$8, "
+                         f"object_type_name_he=$9, object_size=$10, comment=$11, start_work=$12 "
+                         f"WHERE order_id=$13 "
+                         f"ON CONFLICT DO NOTHING RETURNING *;", city, street, house, longitudes,
+                         latitudes, object_type_id, object_type_name_ru, object_type_name_en,
+                         object_type_name_he, object_size, comment, start_work, order_id)
 
 
 # Создаем новую таблицу
