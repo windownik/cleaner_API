@@ -26,7 +26,7 @@ async def create_new_order(city: str, street: str, house_room: str, object_size:
     street: street in object address\n
     house_room: number of house or room in address\n
     object_size: index of object size. Can be: 0, 1, 2 \n
-    object_index: index of objects list from database\n
+    object_type_id: index of objects list from database\n
     comment: addition information for order\n
     start_work_time: date and time of start work. Example: 27-11-2023 14:35:45\n
     latitudes: (Широта) of home/work address\n
@@ -94,13 +94,22 @@ async def get_order(order_id: int, access_token: str, db=Depends(data_b.connecti
 
 
 @app.put(path='/order', tags=['Orders'], responses=create_get_order_res)
-async def get_order(access_token: str, order_id: int, city: str = '0', street: str = '0',
-                    house_room: str = '0', object_size: int = 0, object_type_id: int = 0, latitudes: float = 0,
-                    longitudes: float = 0, start_work_time: str = '0', comment: str = '0',
+async def get_order(access_token: str, order_id: int, city: str, street: str,
+                    house_room: str, object_size: int, object_type_id: int, latitudes: float,
+                    longitudes: float, start_work_time: str, comment: str,
                     db=Depends(data_b.connection)):
     """Get order from dataBase with id.\n
     order_id: id of order in dataBase\n
+    city: city in object address\n
+    street: street in object address\n
+    house_room: number of house or room in address\n
+    object_size: index of object size. Can be: 0, 1, 2 \n
+    object_type_id: index of objects list from database\n
+    comment: addition information for order\n
+    start_work_time: date and time of start work. Example: 27-11-2023 14:35:45\n
     order_status: new status for order with id\n
+    latitudes: (Широта) of home/work address\n
+    longitudes: (Долгота) of home/work address\n
     access_token: access token in our service"""
 
     user_id = await conn.get_token(db=db, token_type='access', token=access_token)
