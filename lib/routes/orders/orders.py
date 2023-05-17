@@ -64,6 +64,12 @@ async def create_new_order(city: str, street: str, house_room: str, object_size:
                                        object_type_name_ru=object_type[0]['name_ru'])
 
     order = Order.parse_obj(new_order[0])
+
+    msg_id = await conn.create_msg(msg_id=order.order_id, msg_type='new_order', title='Новый заказ на модерацию',
+                                   text=f'{user_data[0]["name"]}\n'
+                                        f'Адрес: {order.address.street} {order.address.house}, {order.address.city}',
+                                   description='0',
+                                   lang=user_data[0]['lang'], from_id=user_id[0][0], to_id=0, user_type='admin', db=db)
     return JSONResponse(content={"ok": True,
                                  'order': order.dict(),
                                  },
