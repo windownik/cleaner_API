@@ -98,8 +98,15 @@ async def get_order(order_id: int, access_token: str, db=Depends(data_b.connecti
 
     order = Order()
     order.from_db(order_data[0])
+
+    user_data = await conn.read_data(db=db, name='*', table='all_users',
+                                     id_name='user_id', id_data=order.creator_id)
+
+    user = User(user_data[0])
+
     return JSONResponse(content={"ok": True,
-                                 'order': order.dict()},
+                                 'order': order.dict(),
+                                 'from_user': user.get_user_json()},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
 
