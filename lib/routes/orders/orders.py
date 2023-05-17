@@ -6,7 +6,7 @@ from fastapi import Depends
 from starlette.responses import Response, JSONResponse
 
 from lib import sql_connect as conn
-from lib.db_objects import Order
+from lib.db_objects import Order, User
 from lib.response_examples import *
 from lib.sql_connect import data_b, app
 
@@ -65,6 +65,8 @@ async def create_new_order(city: str, street: str, house_room: str, object_size:
     order = Order()
     order.from_db(new_order[0])
 
+    user = User(user_data[0])
+
     await conn.create_msg(msg_id=order.order_id, msg_type='new_order', title='Новый заказ на модерацию',
                           text=f'{user_data[0]["name"]}\n'
                                f'Адрес: {order.address.street} {order.address.house}, {order.address.city}',
@@ -72,7 +74,8 @@ async def create_new_order(city: str, street: str, house_room: str, object_size:
                           lang=user_data[0]['lang'], from_id=user_id[0][0], to_id=0, user_type='admin', db=db)
 
     return JSONResponse(content={'ok': True,
-                                 'order': order.dict()
+                                 'order': order.dict(),
+                                 'from_user': user.get_user_json()
                                  },
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
