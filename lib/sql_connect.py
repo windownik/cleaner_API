@@ -149,7 +149,7 @@ async def create_order_table(db):
  house TEXT DEFAULT '0',
  longitudes DOUBLE PRECISION,
  latitudes DOUBLE PRECISION,
- object_type_id TEXT DEFAULT '0',
+ object_type_id INTEGER DEFAULT 0,
  object_type_name_ru TEXT DEFAULT '0',
  object_type_name_en TEXT DEFAULT '0',
  object_type_name_he TEXT DEFAULT '0',

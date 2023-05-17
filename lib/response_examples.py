@@ -496,7 +496,38 @@ create_get_order_res = {
                     "odd": {
                         "summary": "Success",
                         "value": {"ok": True,
-                                  'order': {'order_id': 1}}
+                                  'order': {
+                                      "ok": True,
+                                      "order": {
+                                          "order_id": 20,
+                                          "creator_id": 20,
+                                          "worker_id": 20,
+                                          "address": {
+                                              "city": "Minsk",
+                                              "street": "Mosprospect",
+                                              "house": "1 2",
+                                              "latitudes": 21.323,
+                                              "longitudes": 32.344
+                                          },
+                                          "object_type_id": 1,
+                                          "object_name_ru": "Убираю квартиры",
+                                          "object_name_en": "I clean apartments",
+                                          "object_name_he": "I clean apartments",
+                                          "object_size": 1,
+                                          "comment": "Hack world",
+                                          "status": "created",
+                                          "review": {
+                                              "order_id": 20,
+                                              "worker_id": 0,
+                                              "review_text": "0",
+                                              "score": 0,
+                                              "review_status": "created",
+                                              "review_date": "None"
+                                          },
+                                          "start_work": "2023-11-27 14:35:45",
+                                          "create_date": "2023-05-17 12:42:53.153262"
+                                      }
+                                  }}
                     },
                 }
             }

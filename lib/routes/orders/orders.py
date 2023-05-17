@@ -56,22 +56,23 @@ async def create_new_order(city: str, street: str, house_room: str, object_size:
                                      'description': "Bad data in str start_work_time"},
                             status_code=_status.HTTP_400_BAD_REQUEST)
 
-    new_order = await conn.write_order(db=db, creator_id=user_id, city=city, street=street, house=house_room,
+    new_order = await conn.write_order(db=db, creator_id=user_id[0][0], city=city, street=street, house=house_room,
                                        latitudes=latitudes, longitudes=longitudes, object_type_id=object_type_id,
                                        object_size=object_size, start_work=start_work, comment=comment,
                                        object_type_name_en=object_type[0]['name_en'],
                                        object_type_name_he=object_type[0]['name_heb'],
                                        object_type_name_ru=object_type[0]['name_ru'])
+    order = Order()
+    order.from_db(new_order[0])
 
-    order = Order.parse_obj(new_order[0])
+    await conn.create_msg(msg_id=order.order_id, msg_type='new_order', title='Новый заказ на модерацию',
+                          text=f'{user_data[0]["name"]}\n'
+                               f'Адрес: {order.address.street} {order.address.house}, {order.address.city}',
+                          description='0',
+                          lang=user_data[0]['lang'], from_id=user_id[0][0], to_id=0, user_type='admin', db=db)
 
-    msg_id = await conn.create_msg(msg_id=order.order_id, msg_type='new_order', title='Новый заказ на модерацию',
-                                   text=f'{user_data[0]["name"]}\n'
-                                        f'Адрес: {order.address.street} {order.address.house}, {order.address.city}',
-                                   description='0',
-                                   lang=user_data[0]['lang'], from_id=user_id[0][0], to_id=0, user_type='admin', db=db)
-    return JSONResponse(content={"ok": True,
-                                 'order': order.dict(),
+    return JSONResponse(content={'ok': True,
+                                 'order': order.dict()
                                  },
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
@@ -92,7 +93,8 @@ async def get_order(order_id: int, access_token: str, db=Depends(data_b.connecti
                                      'description': "Bad order_id"},
                             status_code=_status.HTTP_400_BAD_REQUEST)
 
-    order = Order.parse_obj(order_data[0])
+    order = Order()
+    order.from_db(order_data[0])
     return JSONResponse(content={"ok": True,
                                  'order': order.dict()},
                         status_code=_status.HTTP_200_OK,
@@ -155,7 +157,8 @@ async def get_order(access_token: str, order_id: int, city: str, street: str,
                                      'description': "Get some error with update"},
                             status_code=_status.HTTP_400_BAD_REQUEST)
 
-    order = Order.parse_obj(order_data[0])
+    order = Order()
+    order.from_db(order_data[0])
     return JSONResponse(content={"ok": True,
                                  'description': 'order successfully updated',
                                  'order': order.dict()},

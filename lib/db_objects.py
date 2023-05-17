@@ -132,7 +132,6 @@ class Message:
     create_date: datetime.datetime = None
 
     def __init__(self, data: dict = None, user_from: dict = None, user_to: dict = None):
-
         if data is not None:
             self.line_id = data['id']
             self.msg_id = data['msg_id']
@@ -178,15 +177,31 @@ class UsersWork(BaseModel):
     object_size: int
 
 
-class OrderAddress(BaseModel):
+class OrderAddress:
     city: str
     street: str
     house: str
     latitudes: float  # Широта
     longitudes: float  # Долгота
 
+    def from_db(self, data: dict):
+        self.city = data['city']
+        self.street = data['street']
+        self.house = data['house']
+        self.latitudes = data['latitudes']
+        self.longitudes = data['longitudes']
 
-class Review(BaseModel):
+    def dict(self) -> dict:
+        return {
+            'city': self.city,
+            'street': self.street,
+            'house': self.house,
+            'latitudes': self.latitudes,
+            'longitudes': self.longitudes,
+        }
+
+
+class Review:
     order_id: int
     worker_id: int
     review_text: str
@@ -194,8 +209,26 @@ class Review(BaseModel):
     review_status: str
     review_date: datetime.datetime
 
+    def from_db(self, data: dict):
+        self.order_id = data['order_id']
+        self.worker_id = data['worker_id']
+        self.review_text = data['review_text']
+        self.score = data['score']
+        self.review_status = data['review_status']
+        self.review_date = data['review_date']
 
-class Order(BaseModel):
+    def dict(self):
+        return {
+            'order_id': self.order_id,
+            'worker_id': self.worker_id,
+            'review_text': self.review_text,
+            'score': self.score,
+            'review_status': self.review_status,
+            'review_date': str(self.review_date)
+        }
+
+
+class Order:
     order_id: int
     creator_id: int
     worker_id: int
@@ -209,4 +242,44 @@ class Order(BaseModel):
     status: str
     review: Review
     start_work: datetime.datetime
-    create_work: datetime.datetime
+    create_date: datetime.datetime
+
+    def from_db(self, data: dict):
+        order_address = OrderAddress()
+        order_address.from_db(data)
+
+        review = Review()
+        review.from_db(data)
+
+        self.order_id = data['order_id']
+        self.creator_id = data['creator_id']
+        self.worker_id = data['worker_id']
+        self.address = order_address
+        self.object_type_id = data['object_type_id']
+        self.object_name_ru = data['object_type_name_ru']
+        self.object_name_en = data['object_type_name_en']
+        self.object_name_he = data['object_type_name_he']
+        self.object_size = data['object_size']
+        self.comment = data['comment']
+        self.status = data['status']
+        self.review = review
+        self.start_work = data['start_work']
+        self.create_date = data['create_date']
+
+    def dict(self):
+        return {
+            'order_id': self.order_id,
+            'creator_id': self.order_id,
+            'worker_id': self.order_id,
+            'address': self.address.dict(),
+            'object_type_id': self.object_type_id,
+            'object_name_ru': self.object_name_ru,
+            'object_name_en': self.object_name_en,
+            'object_name_he': self.object_name_he,
+            'object_size': self.object_size,
+            'comment': self.comment,
+            'status': self.status,
+            'review': self.review.dict(),
+            'start_work': str(self.start_work),
+            'create_date': str(self.create_date),
+        }
