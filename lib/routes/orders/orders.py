@@ -8,6 +8,7 @@ from starlette.responses import Response, JSONResponse
 from lib import sql_connect as conn
 from lib.db_objects import Order, User
 from lib.response_examples import *
+from lib.routes.push.push_func import send_push
 from lib.sql_connect import data_b, app
 
 ip_server = os.environ.get("IP_SERVER")
@@ -172,5 +173,53 @@ async def get_order(access_token: str, order_id: int, city: str, street: str,
     return JSONResponse(content={"ok": True,
                                  'description': 'order successfully updated',
                                  'order': order.dict()},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.put(path='/order_status', tags=['Orders'], responses=create_get_order_res)
+async def admin_confirm_ban_order(order_id: int, status: str, access_token: str, comment: str = '0',
+                                  db=Depends(data_b.connection)):
+    """Admin Send response while order will being checked.\n
+    order_id: id of order in dataBase\n
+    status: new order status, can be: ban, return, confirm\n
+    comment: not necessary parameter. Put it when you want to send msg to order creator\n
+    access_token: access token in our service"""
+    user_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
+    if not user_id:
+        return Response(content="bad access token or now rights",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    if status not in ('ban', 'return', 'confirm'):
+        return Response(content="bad new status",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    order_data = await conn.read_data(db=db, name='*', table='orders', id_name='order_id', id_data=order_id)
+    if not order_data:
+        return JSONResponse(content={"ok": False,
+                                     'description': "Bad order_id"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    order = Order()
+    order.from_db(order_data[0])
+
+    await conn.update_data(db=db, table='orders', name='status', id_data=order_id, data=status)
+    user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='user_id', id_data=user_id[0][0])
+    user = User(user_data[0])
+
+    if comment != '0':
+        push_token = await conn.read_data(db=db, table='all_users', name='push', id_name='user_id',
+                                          id_data=order.creator_id)
+        if push_token:
+            await conn.create_msg(msg_id=order.order_id, msg_type='moder_order_msg', title='Message from moderator',
+                                  text=comment,
+                                  description='0',
+                                  lang=user_data[0]['lang'], from_id=user_id[0][0], to_id=order.creator_id,
+                                  user_type='user', db=db)
+            send_push(fcm_token=push_token[0][0], title='Message from moderator', body=comment, main_text=comment,
+                      push_type='moder_order_msg')
+
+    return JSONResponse(content={"ok": True,
+                                 'description': "Order successfully updated."},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
