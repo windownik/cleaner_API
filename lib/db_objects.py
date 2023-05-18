@@ -242,6 +242,7 @@ class Order:
     status: str
     review: Review
     start_work: datetime.datetime
+    status_date: datetime.datetime
     create_date: datetime.datetime
 
     def from_db(self, data: dict):
@@ -264,6 +265,7 @@ class Order:
         self.status = data['status']
         self.review = review
         self.start_work = data['start_work']
+        self.status_date = data['status_date']
         self.create_date = data['create_date']
 
     def dict(self):
@@ -281,5 +283,6 @@ class Order:
             'status': self.status,
             'review': self.review.dict(),
             'start_work': str(self.start_work),
+            'status_date': str(self.status_date),
             'create_date': str(self.create_date),
         }

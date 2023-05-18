@@ -161,6 +161,7 @@ async def create_order_table(db):
  score INTEGER DEFAULT 0,
  review_date timestamp,
  start_work timestamp,
+ status_date timestamp,
  create_date timestamp
  )''')
 
