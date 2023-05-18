@@ -100,8 +100,7 @@ async def get_order(order_id: int, access_token: str, db=Depends(data_b.connecti
     order = Order()
     order.from_db(order_data[0])
 
-    user_data = await conn.read_data(db=db, name='*', table='all_users',
-                                     id_name='user_id', id_data=order.creator_id)
+    user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='user_id', id_data=order.creator_id)
 
     user = User(user_data[0])
 
@@ -205,8 +204,6 @@ async def admin_confirm_ban_order(order_id: int, status: str, access_token: str,
 
     await conn.update_data(db=db, table='orders', name='status', id_data=order_id, data=status)
     await conn.update_data(db=db, table='orders', name='status_date', id_data=order_id, data=datetime.datetime.now())
-    user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='user_id', id_data=user_id[0][0])
-    user = User(user_data[0])
 
     if comment != '0':
         push_token = await conn.read_data(db=db, table='all_users', name='push', id_name='user_id',
@@ -215,7 +212,7 @@ async def admin_confirm_ban_order(order_id: int, status: str, access_token: str,
             await conn.create_msg(msg_id=order.order_id, msg_type='moder_order_msg', title='Message from moderator',
                                   text=comment,
                                   description='0',
-                                  lang=user_data[0]['lang'], from_id=user_id[0][0], to_id=order.creator_id,
+                                  lang='en', from_id=user_id[0][0], to_id=order.creator_id,
                                   user_type='user', db=db)
             send_push(fcm_token=push_token[0][0], title='Message from moderator', body=comment, main_text=comment,
                       push_type='moder_order_msg')
