@@ -263,6 +263,7 @@ async def admin_get_orders(user_id: int, access_token: str, db=Depends(data_b.co
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
     orders_data = await conn.read_data(db=db, table='orders', id_name='creator_id', id_data=user_id)
+    orders_count = await conn.count_data(db=db, table='orders', id_name='creator_id', id_data=user_id)
 
     orders_list = []
     orders_in_deal = []
@@ -276,6 +277,7 @@ async def admin_get_orders(user_id: int, access_token: str, db=Depends(data_b.co
 
     return JSONResponse(content={"ok": True,
                                  "orders_in_deal": orders_in_deal,
+                                 "orders_count": orders_count[0][0],
                                  'orders': orders_list},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})

@@ -267,6 +267,12 @@ async def read_data(db: Depends, table: str, id_name: str, id_data, name: str = 
 
 
 # получаем данные с одним фильтром
+async def count_data(db: Depends, table: str, id_name: str, id_data):
+    data = await db.fetch(f"SELECT COUNT(*) FROM {table} WHERE {id_name} = $1;", id_data)
+    return data
+
+
+# получаем данные с одним фильтром
 async def read_users_work(db: Depends, user_id: int):
     data = await db.fetch(f"SELECT work.id as work_id, work.work_type, work.object_id, work.object_size, "
                           f"object_type.name_ru as object_name_ru, "
