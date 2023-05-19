@@ -236,12 +236,17 @@ async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
     orders_data = await conn.read_data(db=db, table='orders', id_name='creator_id', id_data=user_id[0][0])
 
     orders_list = []
+    orders_in_deal = []
+
     for order in orders_data:
         _order = Order()
         _order.from_db(order)
         orders_list.append(_order)
+        if _order.status != 'close' or _order.status != 'ban' or _order.status != 'finish':
+            orders_in_deal.append(_order.order_id)
 
     return JSONResponse(content={"ok": True,
+                                 "orders_in_deal": orders_in_deal,
                                  'orders': orders_list},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
