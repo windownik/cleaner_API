@@ -221,3 +221,27 @@ async def admin_confirm_ban_order(order_id: int, status: str, access_token: str,
                                  'description': "Order successfully updated."},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.get(path='/all_orders', tags=['Orders'], responses=create_get_order_res)
+async def admin_confirm_ban_order(access_token: str, db=Depends(data_b.connection)):
+    """Get all users orders from dataBase.\n
+    access_token: access token in our service"""
+
+    user_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not user_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    orders_data = await conn.read_data(db=db, table='orders', id_name='creator_id', id_data=user_id[0][0])
+
+    orders_list = []
+    for order in orders_data:
+        _order = Order()
+        _order.from_db(order)
+        orders_list.append(_order)
+
+    return JSONResponse(content={"ok": True,
+                                 'orders': orders_list},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
