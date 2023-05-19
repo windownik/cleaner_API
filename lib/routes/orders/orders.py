@@ -224,7 +224,7 @@ async def admin_confirm_ban_order(order_id: int, status: str, access_token: str,
 
 
 @app.get(path='/all_orders', tags=['Orders'], responses=create_get_order_res)
-async def admin_confirm_ban_order(access_token: str, db=Depends(data_b.connection)):
+async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
     """Get all users orders from dataBase.\n
     access_token: access token in our service"""
 
