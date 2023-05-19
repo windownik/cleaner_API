@@ -241,7 +241,7 @@ async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
     for order in orders_data:
         _order = Order()
         _order.from_db(order)
-        orders_list.append(_order)
+        orders_list.append(_order.dict())
         if _order.status != 'close' or _order.status != 'ban' or _order.status != 'finish':
             orders_in_deal.append(_order.order_id)
 
