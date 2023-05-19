@@ -250,3 +250,32 @@ async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
                                  'orders': orders_list},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.get(path='/all_orders_admin', tags=['Orders'], responses=get_all_order_res)
+async def admin_get_orders(user_id: int, access_token: str, db=Depends(data_b.connection)):
+    """Admin Get all users orders from dataBase.\n
+    access_token: access token in our service"""
+
+    admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
+    if not admin_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    orders_data = await conn.read_data(db=db, table='orders', id_name='creator_id', id_data=user_id)
+
+    orders_list = []
+    orders_in_deal = []
+
+    for order in orders_data:
+        _order = Order()
+        _order.from_db(order)
+        orders_list.append(_order.dict())
+        if _order.status != 'close' or _order.status != 'ban' or _order.status != 'finish':
+            orders_in_deal.append(_order.order_id)
+
+    return JSONResponse(content={"ok": True,
+                                 "orders_in_deal": orders_in_deal,
+                                 'orders': orders_list},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
