@@ -534,3 +534,57 @@ create_get_order_res = {
         }
     },
 }
+
+get_all_order_res = {
+    200: {
+        "description": "Success",
+        "content": {
+            "application/json": {
+                "examples": {
+                    "odd": {
+                        "summary": "Success",
+                        "value": {
+                            "ok": True,
+                            "orders_in_deal": [
+                                1,
+
+                            ],
+                            "orders": [
+                                {
+                                    "order_id": 1,
+                                    "creator_id": 1,
+                                    "worker_id": 1,
+                                    "address": {
+                                        "city": "Минск ",
+                                        "street": "брикеля ",
+                                        "house": "12",
+                                        "latitudes": 23.847127,
+                                        "longitudes": 53.699845
+                                    },
+                                    "object_type_id": 1,
+                                    "object_name_ru": "Убираю квартиры",
+                                    "object_name_en": "I clean apartments",
+                                    "object_name_he": "I clean apartments",
+                                    "object_size": 1,
+                                    "comment": "помыть пол ",
+                                    "status": "created",
+                                    "review": {
+                                        "order_id": 1,
+                                        "worker_id": 0,
+                                        "review_text": "0",
+                                        "score": 0,
+                                        "review_status": "created",
+                                        "review_date": "None"
+                                    },
+                                    "start_work": "2023-05-18 09:04:00",
+                                    "status_date": "None",
+                                    "create_date": "2023-05-18 15:07:07.185038"
+                                }
+                            ]
+                        }
+                    },
+                }
+            }
+        }
+    },
+}
