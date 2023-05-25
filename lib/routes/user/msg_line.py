@@ -31,8 +31,7 @@ async def create_new_messages(access_token: str, to_user_id: int, title: str, te
                               msg_type: str = 'text', msg_id: int = 0, push: bool = False,
                               db=Depends(data_b.connection)):
     """
-    Use this route for creating new message
-
+    Use this route for creating new message\n\n
 
     description: short text\n
     text: main text of message\n
@@ -43,7 +42,15 @@ async def create_new_messages(access_token: str, to_user_id: int, title: str, te
     user_type: can be 'user', 'admin', 'all'\n
     push: Send True for sending push notification\n
     lang: Can be 'en', 'ru', 'he'\n
-    msg_type: Can be 'text', 'new_user', 'new_deal'\n
+    msg_type: Can be 'text', 'img', 'new_user', 'new_order'\n
+    _____________\n
+    'text' - Просто текстовое сообщение отправляемое от одного пользователя другому или в рассылке\n
+    'img' - Просто графическое сообщение отправляемое от одного пользователя другому или в рассылке\n
+    'new_user' - Автоматически созданное сообщение при регистрации нового пользователя msg_id в таком сообщении
+    равен user_id нового пользователя, to_id равен 0, user_type - admin\n
+    'new_order' - Автоматически созданное сообщение при создании нового заказа msg_id в таком сообщении
+    равен order_id нового заказа, to_id равен 0, user_type - admin\n
+    'new_order_admin_comment' - Комментарий отправленный админом пользователю при модерации ордера\n
     """
     from_id = await conn.get_token(db=db, token_type='access', token=access_token)
     if not from_id:
