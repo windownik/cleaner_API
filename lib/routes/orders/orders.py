@@ -281,3 +281,24 @@ async def admin_get_orders(user_id: int, access_token: str, db=Depends(data_b.co
                                  'orders': orders_list},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.delete(path='/order', tags=['Orders'], responses=get_all_order_res)
+async def admin_get_orders(order_id: int, access_token: str, db=Depends(data_b.connection)):
+    """User delete own order.\n
+    access_token: access token in our service"""
+
+    user_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not user_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    orders_data = await conn.read_data(db=db, table='orders', id_name='order_id', id_data=order_id)
+    if not orders_data:
+        return Response(content="bad order_id",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    return JSONResponse(content={"ok": True,
+                                 "description": 'The order was successfully deleted.'},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
