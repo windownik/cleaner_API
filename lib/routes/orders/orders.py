@@ -299,6 +299,10 @@ async def admin_get_orders(order_id: int, access_token: str, db=Depends(data_b.c
         return Response(content="bad order_id",
                         status_code=_status.HTTP_400_BAD_REQUEST)
 
+    if orders_data[0]['creator_id'] != user_id[0][0]:
+        return Response(content="no rights for delete",
+                        status_code=_status.HTTP_400_BAD_REQUEST)
+
     await conn.update_data(table='orders', name='status', data='delete', id_name='order_id', id_data=order_id, db=db)
     await conn.update_msg(name='status', data='delete', db=db, order_id=order_id, user_id=user_id[0][0])
 
