@@ -286,6 +286,7 @@ async def admin_get_orders(user_id: int, access_token: str, db=Depends(data_b.co
 @app.delete(path='/order', tags=['Orders'], responses=delete_order_res)
 async def admin_get_orders(order_id: int, access_token: str, db=Depends(data_b.connection)):
     """User delete own order.\n
+    order_id: id of order was delete\n
     access_token: access token in our service"""
 
     user_id = await conn.get_token(db=db, token_type='access', token=access_token)
