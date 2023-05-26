@@ -413,7 +413,7 @@ async def update_data(db: Depends, table: str, name: str, id_data, data, id_name
 
 # Обновляем информацию в msg
 async def update_msg(db: Depends, name: str, order_id: int, user_id: int, data):
-    await db.execute(f"UPDATE message_line SET {name}=$1 WHERE msg_type=$2 AND msg_id=$3 AND from_id=$4 RETURNING id;",
+    await db.execute(f"UPDATE message_line SET {name}=$1 WHERE msg_type=$2 AND msg_id=$3 AND from_id=$4;",
                      data, 'new_order', order_id, user_id)
 
 

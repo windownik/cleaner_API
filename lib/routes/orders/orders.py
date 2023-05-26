@@ -299,14 +299,9 @@ async def admin_get_orders(order_id: int, access_token: str, db=Depends(data_b.c
                         status_code=_status.HTTP_400_BAD_REQUEST)
 
     await conn.update_data(table='orders', name='status', data='delete', id_name='order_id', id_data=order_id, db=db)
-    msg_id = await conn.update_msg(name='status', data='delete', db=db, order_id=order_id, user_id=user_id)
-    if not msg_id:
-        return Response(content="Error with update message",
-                        status_code=_status.HTTP_400_BAD_REQUEST)
+    await conn.update_msg(name='status', data='delete', db=db, order_id=order_id, user_id=user_id[0][0])
 
     return JSONResponse(content={"ok": True,
-                                 "msg": msg_id[0][0],
-                                 "count": len(msg_id),
                                  "description": 'The order was successfully deleted.'},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
