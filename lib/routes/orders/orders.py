@@ -256,7 +256,7 @@ async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
 
 
 @app.get(path='/all_orders_admin', tags=['Orders'], responses=get_all_order_res)
-async def admin_get_orders(user_id: int, access_token: str, db=Depends(data_b.connection)):
+async def admin_get_orders(access_token: str, db=Depends(data_b.connection)):
     """Admin Get all users orders from dataBase.\n
     access_token: access token in our service"""
 
