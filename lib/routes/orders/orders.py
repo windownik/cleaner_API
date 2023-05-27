@@ -32,7 +32,10 @@ async def create_new_order(city: str, street: str, house_room: str, object_size:
     start_work_time: date and time of start work. Example: 27-11-2023 14:35:45\n
     latitudes: (Широта) of home/work address\n
     longitudes: (Долгота) of home/work address\n
-    access_token: access token in our service"""
+    access_token: access token in our service\n
+    _______________\n
+    status can be: created, search, return, finish, delete,
+    """
     user_id = await conn.get_token(db=db, token_type='access', token=access_token)
     if not user_id:
         return Response(content="bad access token",
@@ -262,22 +265,18 @@ async def admin_get_orders(user_id: int, access_token: str, db=Depends(data_b.co
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
-    orders_data = await conn.read_data(db=db, table='orders', id_name='creator_id', id_data=user_id)
-    orders_count = await conn.count_data(db=db, table='orders', id_name='creator_id', id_data=user_id)
+    orders_data = await conn.admin_read_orders(db=db,)
+    orders_count = len(orders_data)
 
     orders_list = []
-    orders_in_deal = []
 
     for order in orders_data:
         _order = Order()
         _order.from_db(order)
         orders_list.append(_order.dict())
-        if _order.status != 'close' or _order.status != 'ban' or _order.status != 'finish':
-            orders_in_deal.append(_order.order_id)
 
     return JSONResponse(content={"ok": True,
-                                 "orders_in_deal": orders_in_deal,
-                                 "orders_count": orders_count[0][0],
+                                 "orders_count": orders_count,
                                  'orders': orders_list},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
