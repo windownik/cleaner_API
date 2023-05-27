@@ -386,10 +386,10 @@ async def update_order(db: Depends, order_id: int, city: str, street: str, house
                        object_type_name_he: str, object_size: int, comment: str, start_work: datetime.datetime):
     return await db.fetch(f"UPDATE orders SET city=$1, street=$2, house=$3, longitudes=$4, latitudes=$5, "
                           f"object_type_id=$6, object_type_name_ru=$7, object_type_name_en=$8, "
-                          f"object_type_name_he=$9, object_size=$10, comment=$11, start_work=$12 "
-                          f"WHERE order_id=$13 RETURNING *;", city, street, house, longitudes,
+                          f"object_type_name_he=$9, object_size=$10, comment=$11, start_work=$12, status=$13 "
+                          f"WHERE order_id=$14 RETURNING *;", city, street, house, longitudes,
                           latitudes, object_type_id, object_type_name_ru, object_type_name_en,
-                          object_type_name_he, object_size, comment, start_work, order_id)
+                          object_type_name_he, object_size, comment, start_work, 'created', order_id)
 
 
 # Создаем новую таблицу
