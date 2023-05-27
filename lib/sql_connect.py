@@ -267,6 +267,12 @@ async def read_data(db: Depends, table: str, id_name: str, id_data, name: str = 
 
 
 # получаем данные с одним фильтром
+async def read_data_order(db: Depends, table: str, id_name: str, id_data, order: str, name: str = '*'):
+    data = await db.fetch(f"SELECT {name} FROM {table} WHERE {id_name} = $1 ORDER BY $2;", id_data, order)
+    return data
+
+
+# получаем данные с одним фильтром
 async def count_data(db: Depends, table: str, id_name: str, id_data):
     data = await db.fetch(f"SELECT COUNT(*) FROM {table} WHERE {id_name} = $1;", id_data)
     return data
@@ -274,7 +280,7 @@ async def count_data(db: Depends, table: str, id_name: str, id_data):
 
 # получаем данные с одним фильтром
 async def admin_read_orders(db: Depends,):
-    data = await db.fetch(f"SELECT * FROM orders;", )
+    data = await db.fetch(f"SELECT * FROM orders ORDER BY order_id;", )
     return data
 
 

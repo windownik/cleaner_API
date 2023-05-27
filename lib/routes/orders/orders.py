@@ -236,7 +236,8 @@ async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
-    orders_data = await conn.read_data(db=db, table='orders', id_name='creator_id', id_data=user_id[0][0])
+    orders_data = await conn.read_data_order(db=db, table='orders', id_name='creator_id', id_data=user_id[0][0],
+                                             order='order_id')
 
     orders_list = []
     orders_in_deal = []
@@ -256,8 +257,8 @@ async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
 
 
 @app.get(path='/all_orders_admin', tags=['Orders'], responses=get_all_order_res)
-async def admin_get_orders(access_token: str, db=Depends(data_b.connection)):
-    """Admin Get all users orders from dataBase.\n
+async def admin_get_all_orders(access_token: str, db=Depends(data_b.connection)):
+    """Admin Get all from dataBase.\n
     access_token: access token in our service"""
 
     admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
@@ -277,6 +278,31 @@ async def admin_get_orders(access_token: str, db=Depends(data_b.connection)):
 
     return JSONResponse(content={"ok": True,
                                  "orders_count": orders_count,
+                                 'orders': orders_list},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.get(path='/admin_get_order', tags=['Orders'], responses=get_all_order_res)
+async def admin_get_order_by_id(order_id: int, access_token: str, db=Depends(data_b.connection)):
+    """Admin Get order from dataBase by order_id.\n
+    access_token: access token in our service"""
+
+    admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
+    if not admin_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    orders_data = await conn.read_data(db=db, table='orders', id_name='order_id', id_data=order_id)
+
+    orders_list = []
+
+    for order in orders_data:
+        _order = Order()
+        _order.from_db(order)
+        orders_list.append(_order.dict())
+
+    return JSONResponse(content={"ok": True,
                                  'orders': orders_list},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
