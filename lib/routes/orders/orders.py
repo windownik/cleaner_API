@@ -112,10 +112,10 @@ async def get_order(order_id: int, access_token: str, db=Depends(data_b.connecti
 
 
 @app.put(path='/order', tags=['Orders'], responses=create_get_order_res)
-async def get_order(access_token: str, order_id: int, city: str, street: str,
-                    house_room: str, object_size: int, object_type_id: int, latitudes: float,
-                    longitudes: float, start_work_time: str, comment: str,
-                    db=Depends(data_b.connection)):
+async def update_order(access_token: str, order_id: int, city: str, street: str,
+                       house_room: str, object_size: int, object_type_id: int, latitudes: float,
+                       longitudes: float, start_work_time: str, comment: str,
+                       db=Depends(data_b.connection)):
     """Get order from dataBase with id.\n
     order_id: id of order in dataBase\n
     city: city in object address\n
@@ -284,7 +284,7 @@ async def admin_get_orders(user_id: int, access_token: str, db=Depends(data_b.co
 
 
 @app.delete(path='/order', tags=['Orders'], responses=delete_order_res)
-async def admin_get_orders(order_id: int, access_token: str, db=Depends(data_b.connection)):
+async def user_delete_orders(order_id: int, access_token: str, db=Depends(data_b.connection)):
     """User delete own order.\n
     order_id: id of order was delete\n
     access_token: access token in our service"""
