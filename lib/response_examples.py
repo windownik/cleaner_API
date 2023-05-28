@@ -7,10 +7,7 @@ get_me_res = {
                     "odd": {
                         "summary": "Success",
                         "value": {"ok": True,
-                                  'count': 22,
-                                  'msg_list': [
-                                      {}
-                                  ]}
+                                  'user': {}}
                     },
                 }
             }
@@ -499,9 +496,9 @@ create_get_order_res = {
                                   'order': {
                                       "ok": True,
                                       "order": {
-                                          "order_id": 20,
-                                          "creator_id": 20,
-                                          "worker_id": 20,
+                                          "order_id": 12,
+                                          "creator_id": 14,
+                                          "worker_id": 345,
                                           "address": {
                                               "city": "Minsk",
                                               "street": "Mosprospect",

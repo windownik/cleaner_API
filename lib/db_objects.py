@@ -271,8 +271,8 @@ class Order:
     def dict(self):
         return {
             'order_id': self.order_id,
-            'creator_id': self.order_id,
-            'worker_id': self.order_id,
+            'creator_id': self.creator_id,
+            'worker_id': self.worker_id,
             'address': self.address.dict(),
             'object_type_id': self.object_type_id,
             'object_name_ru': self.object_name_ru,
