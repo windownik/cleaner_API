@@ -177,3 +177,24 @@ async def update_user_information(name: str, phone: int, email: str, description
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'}
                         )
+
+
+@app.get(path='/get_user_by_id', tags=['User'], responses=get_me_res)
+async def get_user_by_id(user_id: int, access_token: str, db=Depends(data_b.connection), ):
+    """Return user with user_id.\n
+    access_token: This is access auth token. You can get it when create account, login or """
+    my_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not my_id:
+        return JSONResponse(content={"ok": False, "description": "bad access token"},
+                            status_code=_status.HTTP_401_UNAUTHORIZED)
+    user_data = await conn.read_data(db=db, name='*', table='all_users',
+                                     id_name='user_id', id_data=user_id)
+    if not user_data:
+        return JSONResponse(content={"ok": False, "description": "no user in database"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+    user = User(user_data[0])
+    return JSONResponse(content={"ok": True,
+                                 'user': user.get_user_json(),
+                                 },
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
