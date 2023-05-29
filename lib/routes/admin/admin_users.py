@@ -28,7 +28,7 @@ async def update_user_information(user_id: int, status: str, access_token: str, 
 
     user_id: users number from our service\n
     status: can be: worker, customer, admin, ban\n
-    access_token: (Долгота) of home/work address\n"""
+    access_token: This is access auth token. You can get it when create account, login or \n"""
 
     if status != 'customer' and status != 'worker' and status != 'admin' and status != 'ban':
         return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
@@ -63,7 +63,7 @@ async def admin_get_users_with_search(access_token: str, search: str = '0', offs
     """Admin get users with search and offset.
 
     search: substring for searching in email, name and phone\n
-    access_token: (Долгота) of home/work address\n"""
+    access_token: This is access auth token. You can get it when create account, login or \n"""
 
     admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
 
