@@ -337,8 +337,8 @@ async def get_users_for_push(db: Depends, lang: str, users_account_type: str, ):
 
 
 # получаем данные без фильтров
-async def read_all(db: Depends, table: str, name: str = '*'):
-    data = await db.fetch(f"SELECT {name} FROM {table};")
+async def read_all(db: Depends, table: str, order: str, name: str = '*'):
+    data = await db.fetch(f"SELECT {name} FROM {table} ORDER BY {order};")
     return data
 
 

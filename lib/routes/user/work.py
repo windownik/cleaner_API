@@ -97,7 +97,7 @@ async def get_profession_list(db=Depends(data_b.connection)):
     """
     Get all objects types list
     """
-    all_object = await conn.read_all(table='object_type', db=db)
+    all_object = await conn.read_all(table='object_type', db=db, order='id')
     object_list = []
     for i in all_object:
         object_list.append(

@@ -15,11 +15,7 @@ pipeline {
                 sh 'ssh root@185.51.247.27 \'cd cleaner/cleaner_API\''
             }
         }
-        stage("step ls") {
-            steps {
-                sh 'ls'
-            }
-        }
+
         stage('Docker Down and delete') {
           steps {
             sh 'docker-compose down'
@@ -28,7 +24,7 @@ pipeline {
         }
         stage('Rework Docker containers') {
             steps {
-                sh 'docker compose up --build --no-color --wait'
+                sh 'docker compose up --build'
                 sh 'docker compose ps'
             }
         }

@@ -71,17 +71,29 @@ async def admin_get_users_with_search(access_token: str, search: str = '0', offs
         return JSONResponse(content={"ok": False,
                                      'description': "bad access token or not enough rights"},
                             status_code=_status.HTTP_401_UNAUTHORIZED)
+    search = search.lower()
     users_list = []
     if search == "0":
         users_count = await conn.count_all(table='all_users', db=db)
         users_data = await conn.admin_read_users(db=db, offset=offset, limit=limit)
+        for one in users_data:
+            user = User(one)
+            users_list.append(user.get_user_json())
     else:
         users_count = await conn.admin_count_search_users(search=search, db=db)
-        users_data = await conn.admin_search_users(db=db, offset=offset, limit=limit, search=search)
-
-    for one in users_data:
-        user = User(one)
-        users_list.append(user.get_user_json())
+        users_data = await conn.read_all(table='all_users', db=db, order='user_id DESC')
+        for one in users_data:
+            if search not in (one['email']).lower() and search not in (one['name']).lower() \
+                    and search not in str(one['phone']):
+                continue
+            if offset > 0:
+                offset -= 1
+                continue
+            user = User(one)
+            users_list.append(user.get_user_json())
+            limit -= 1
+            if limit == 0:
+                break
 
     return JSONResponse(content={"ok": True,
                                  "total_users_count": users_count[0][0],
