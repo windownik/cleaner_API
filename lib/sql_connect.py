@@ -272,15 +272,41 @@ async def read_data_order(db: Depends, table: str, id_name: str, id_data, order:
     return data
 
 
-# получаем данные с одним фильтром
+# получаем количество данных с одним фильтром
 async def count_data(db: Depends, table: str, id_name: str, id_data):
     data = await db.fetch(f"SELECT COUNT(*) FROM {table} WHERE {id_name} = $1;", id_data)
+    return data
+
+
+# получаем количество данных all
+async def count_all(db: Depends, table: str):
+    data = await db.fetch(f"SELECT COUNT(*) FROM {table};",)
     return data
 
 
 # получаем данные с одним фильтром
 async def admin_read_orders(db: Depends,):
     data = await db.fetch(f"SELECT * FROM orders ORDER BY order_id DESC;", )
+    return data
+
+
+# получаем данные с одним фильтром
+async def admin_read_users(offset: int, limit: int, db: Depends,):
+    data = await db.fetch(f"SELECT * FROM all_users OFFSET $1 LIMIT $1 ORDER BY user_id DESC;", offset, limit)
+    return data
+
+
+# получаем данные с одним фильтром
+async def admin_search_users(search: str, offset: int, limit: int, db: Depends,):
+    data = await db.fetch(f"SELECT * FROM all_users WHERE email ILIKE $1 OR name ILIKE $2 OR phone ILIKE $3 "
+                          f"OFFSET $4 LIMIT $5 ORDER BY user_id DESC;", search, search, search, offset, limit)
+    return data
+
+
+# получаем данные с одним фильтром
+async def admin_count_search_users(search: str,  db: Depends,):
+    data = await db.fetch(f"SELECT COUNT(*) FROM all_users WHERE email ILIKE $1 OR name ILIKE $2 OR phone ILIKE $3;",
+                          search, search, search)
     return data
 
 

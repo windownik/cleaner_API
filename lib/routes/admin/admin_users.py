@@ -5,6 +5,7 @@ from fastapi import Depends
 from starlette.responses import JSONResponse
 
 from lib import sql_connect as conn
+from lib.db_objects import User
 from lib.response_examples import *
 from lib.sql_connect import data_b, app
 
@@ -52,5 +53,39 @@ async def update_user_information(user_id: int, status: str, access_token: str, 
 
     return JSONResponse(content={"ok": True,
                                  'desc': 'users status updated'},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.get(path='/admin_get_user', tags=['Admin users'], responses=update_user_status_res)
+async def admin_get_users_with_search(access_token: str, search: str = '0', offset: int = 0, limit: int = 5,
+                                      db=Depends(data_b.connection)):
+    """Admin get users with search and offset.
+
+    search: substring for searching in email, name and phone\n
+    access_token: (Долгота) of home/work address\n"""
+
+    admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
+
+    if not admin_id:
+        return JSONResponse(content={"ok": False,
+                                     'description': "bad access token or not enough rights"},
+                            status_code=_status.HTTP_401_UNAUTHORIZED)
+    users_list = []
+    if search == "0":
+        users_count = await conn.count_all(table='all_users', db=db)
+        users_data = await conn.admin_read_users(db=db, offset=offset, limit=limit)
+    else:
+        users_count = await conn.admin_count_search_users(search=search, db=db)
+        users_data = await conn.admin_search_users(db=db, offset=offset, limit=limit, search=search)
+
+    for one in users_data:
+        user = User(one)
+        users_list.append(user)
+
+    return JSONResponse(content={"ok": True,
+                                 "total_users_count": users_count[0][0],
+                                 'users': users_list,
+                                 },
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
