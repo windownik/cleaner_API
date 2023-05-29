@@ -292,7 +292,7 @@ async def admin_read_orders(db: Depends,):
 
 # получаем данные с одним фильтром
 async def admin_read_users(offset: int, limit: int, db: Depends,):
-    data = await db.fetch(f"SELECT * FROM all_users OFFSET $1 LIMIT $1 ORDER BY user_id DESC;", offset, limit)
+    data = await db.fetch(f"SELECT * FROM all_users OFFSET $1 LIMIT $2 ORDER BY user_id DESC;", offset, limit)
     return data
 
 
