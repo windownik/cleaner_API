@@ -75,7 +75,7 @@ async def admin_get_users_with_search(access_token: str, search: str = '0', offs
     users_list = []
     users_count = 0
     if search == "0":
-        users_count = await conn.count_all(table='all_users', db=db)
+        users_count = (await conn.count_all(table='all_users', db=db))[0][0]
         users_data = await conn.admin_read_users(db=db, offset=offset, limit=limit)
         for one in users_data:
             user = User(one)
@@ -96,7 +96,7 @@ async def admin_get_users_with_search(access_token: str, search: str = '0', offs
                 break
 
     return JSONResponse(content={"ok": True,
-                                 "total_users_count": users_count[0][0],
+                                 "total_users_count": users_count,
                                  'users': users_list,
                                  },
                         status_code=_status.HTTP_200_OK,
