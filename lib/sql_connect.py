@@ -292,14 +292,14 @@ async def admin_read_orders(db: Depends,):
 
 # получаем данные с одним фильтром
 async def admin_read_users(offset: int, limit: int, db: Depends,):
-    data = await db.fetch(f"SELECT * FROM all_users OFFSET $1 LIMIT $2 ORDER BY user_id DESC;", offset, limit)
+    data = await db.fetch(f"SELECT * FROM all_users ORDER BY user_id DESC OFFSET $1 LIMIT $2;", offset, limit)
     return data
 
 
 # получаем данные с одним фильтром
 async def admin_search_users(search: str, offset: int, limit: int, db: Depends,):
     data = await db.fetch(f"SELECT * FROM all_users WHERE email ILIKE $1 OR name ILIKE $2 OR phone ILIKE $3 "
-                          f"OFFSET $4 LIMIT $5 ORDER BY user_id DESC;", search, search, search, offset, limit)
+                          f"ORDER BY user_id DESC OFFSET $4 LIMIT $5;", search, search, search, offset, limit)
     return data
 
 
