@@ -73,6 +73,7 @@ async def admin_get_users_with_search(access_token: str, search: str = '0', offs
                             status_code=_status.HTTP_401_UNAUTHORIZED)
     search = search.lower()
     users_list = []
+    users_count = 0
     if search == "0":
         users_count = await conn.count_all(table='all_users', db=db)
         users_data = await conn.admin_read_users(db=db, offset=offset, limit=limit)
@@ -80,7 +81,6 @@ async def admin_get_users_with_search(access_token: str, search: str = '0', offs
             user = User(one)
             users_list.append(user.get_user_json())
     else:
-        users_count = await conn.admin_count_search_users(search=search, db=db)
         users_data = await conn.read_all(table='all_users', db=db, order='user_id DESC')
         for one in users_data:
             if search not in (one['email']).lower() and search not in (one['name']).lower() \
@@ -92,7 +92,7 @@ async def admin_get_users_with_search(access_token: str, search: str = '0', offs
             user = User(one)
             users_list.append(user.get_user_json())
             limit -= 1
-            if limit == 0:
+            if limit <= 0:
                 break
 
     return JSONResponse(content={"ok": True,
