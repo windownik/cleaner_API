@@ -194,7 +194,7 @@ async def admin_confirm_ban_order(order_id: int, status: str, access_token: str,
 
     if status not in ('ban', 'return', 'confirm'):
         return Response(content="bad new status",
-                        status_code=_status.HTTP_401_UNAUTHORIZED)
+                        status_code=_status.HTTP_400_BAD_REQUEST)
 
     order_data = await conn.read_data(db=db, name='*', table='orders', id_name='order_id', id_data=order_id)
     if not order_data:
