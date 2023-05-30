@@ -86,10 +86,10 @@ async def admin_get_users_with_search(access_token: str, search: str = '0', offs
             if search not in (one['email']).lower() and search not in (one['name']).lower() \
                     and search not in str(one['phone']):
                 continue
+            users_count += 1
             if offset > 0:
                 offset -= 1
                 continue
-            users_count += 1
 
             if limit <= 0:
                 pass
