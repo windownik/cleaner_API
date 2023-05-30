@@ -350,7 +350,19 @@ async def read_all_msg(db: Depends, user_id: int, offset: int = 0, limit: int = 
         offset_limit = f" OFFSET {offset} LIMIT {limit}"
     data = await db.fetch(f"SELECT * FROM message_line "
                           f"WHERE (to_id=$1 OR (to_id=0 AND user_type='admin')) "
-                          f"AND status='created' ORDER BY id{offset_limit};", user_id)
+                          f"AND (status='created' OR status='read') ORDER BY id{offset_limit};", user_id)
+    return data
+
+
+# получаем все новые сообщения для пользователя с id
+async def read_all_msg_user(db: Depends, user_id: int, offset: int = 0, limit: int = 0, ):
+    offset_limit = ''
+
+    if offset != 0 or limit != 0:
+        offset_limit = f" OFFSET {offset} LIMIT {limit}"
+    data = await db.fetch(f"SELECT * FROM message_line "
+                          f"WHERE to_id=$1 "
+                          f"AND (status='created' OR status='read') ORDER BY id{offset_limit};", user_id)
     return data
 
 
