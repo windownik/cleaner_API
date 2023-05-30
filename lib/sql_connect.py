@@ -381,17 +381,6 @@ async def count_msg_user(db: Depends, user_id: int):
     return data
 
 
-# получаем все новые сообщения для пользователя с id
-async def read_all_msg_user(db: Depends, user_id: int, user_type: str, offset: int = 0, limit: int = 0, ):
-    offset_limit = ''
-
-    if offset != 0 and limit != 0:
-        offset_limit = f" OFFSET {offset} LIMIT {limit}"
-    data = await db.fetch(f"SELECT * FROM message_line "
-                          f"WHERE to_id=$1 AND status='created' ORDER BY id{offset_limit};", user_id, user_type)
-    return data
-
-
 # получаем данные с 2 фильтрами
 async def read_data_2_were(db: Depends, table: str, id_name1: str, id_name2: str, id_data1, id_data2, name: str):
     data = await db.fetch(f"SELECT {name} FROM {table} WHERE {id_name1} = $1 AND  {id_name2} = $1;", id_data1, id_data2)
