@@ -87,7 +87,7 @@ async def create_new_messages(access_token: str, to_user_id: int, title: str, te
 
 # Admin get all messages
 @app.get(path='/get_my_msg', tags=['Message'], responses=get_me_res)
-async def get_all_my_messages(access_token: str, offset: int = 0, limit: int = 0, db=Depends(data_b.connection)):
+async def admin_get_all_messages(access_token: str, offset: int = 0, limit: int = 0, db=Depends(data_b.connection)):
     """Here you can get new message list. It's command only for admins.\n
     access_token: This is access auth token. You can get it when create account or login"""
     user_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
@@ -115,7 +115,7 @@ async def get_all_my_messages(access_token: str, offset: int = 0, limit: int = 0
 
 # Admin get all messages
 @app.get(path='/user_get_msg', tags=['Message'], responses=get_me_res)
-async def get_all_my_messages(access_token: str, offset: int = 0, limit: int = 0, db=Depends(data_b.connection)):
+async def user_get_all_messages(access_token: str, offset: int = 0, limit: int = 0, db=Depends(data_b.connection)):
     """Here user can get new message list.\n
     access_token: This is access auth token. You can get it when create account or login"""
     user_id = await conn.get_token(db=db, token_type='access', token=access_token)
