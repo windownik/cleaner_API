@@ -86,7 +86,7 @@ async def create_new_messages(access_token: str, to_user_id: int, title: str, te
 
 
 # Admin get all messages
-@app.get(path='/get_my_msg', tags=['Message'], responses=get_me_res)
+@app.get(path='/admin_get_msg', tags=['Message'], responses=get_me_res)
 async def admin_get_all_messages(access_token: str, offset: int = 0, limit: int = 0, db=Depends(data_b.connection)):
     """Here you can get new message list. It's command only for admins.\n
     access_token: This is access auth token. You can get it when create account or login"""
