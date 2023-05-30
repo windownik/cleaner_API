@@ -205,8 +205,9 @@ async def admin_confirm_ban_order(order_id: int, status: str, access_token: str,
     order = Order()
     order.from_db(order_data[0])
 
-    await conn.update_data(db=db, table='orders', name='status', id_data=order_id, data=status)
-    await conn.update_data(db=db, table='orders', name='status_date', id_data=order_id, data=datetime.datetime.now())
+    await conn.update_data(db=db, table='orders', name='status', id_data=order_id, data=status, id_name='order_id')
+    await conn.update_data(db=db, table='orders', name='status_date', id_data=order_id, data=datetime.datetime.now(),
+                           id_name='order_id')
 
     if comment != '0':
         push_token = await conn.read_data(db=db, table='all_users', name='push', id_name='user_id',
