@@ -89,11 +89,15 @@ async def admin_get_users_with_search(access_token: str, search: str = '0', offs
             if offset > 0:
                 offset -= 1
                 continue
-            user = User(one)
-            users_list.append(user.get_user_json())
-            limit -= 1
+            users_count += 1
+
             if limit <= 0:
-                break
+                pass
+            else:
+                user = User(one)
+                users_list.append(user.get_user_json())
+
+            limit -= 1
 
     return JSONResponse(content={"ok": True,
                                  "total_users_count": users_count,
