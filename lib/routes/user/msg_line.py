@@ -97,7 +97,7 @@ async def admin_get_all_messages(access_token: str, offset: int = 0, limit: int 
 
     msg_data = await conn.read_all_msg(db=db, user_id=user_id[0][0], offset=offset,
                                        limit=limit)
-    count = await conn.count_msg(db=db, user_id=user_id[0][0])
+    count = await conn.count_admin_msg(db=db, user_id=user_id[0][0])
     msg_list = []
 
     for _msg_data in msg_data:
@@ -124,7 +124,7 @@ async def user_get_all_messages(access_token: str, offset: int = 0, limit: int =
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
     msg_data = await conn.read_all_msg_user(db=db, user_id=user_id[0][0], offset=offset, limit=limit)
-    count = await conn.count_msg(db=db, user_id=user_id[0][0])
+    count = await conn.count_users_msg(db=db, user_id=user_id[0][0])
     msg_list = []
 
     for _msg_data in msg_data:
