@@ -213,7 +213,14 @@ async def admin_confirm_ban_order(order_id: int, status: str, access_token: str,
         push_token = await conn.read_data(db=db, table='all_users', name='push', id_name='user_id',
                                           id_data=order.creator_id)
         if push_token:
-            await conn.create_msg(msg_id=order.order_id, msg_type='moder_order_msg', title='Message from moderator',
+            lang = await conn.read_data(table='all_users', id_name='user_id', id_data=user_id[0][0], name='lang', db=db)
+            if lang[0][0] == 'ru':
+                title = 'Сообщение от модератора'
+            elif lang[0][0] == 'he':
+                title = 'Message from moderator'
+            else:
+                title = 'Message from moderator'
+            await conn.create_msg(msg_id=order.order_id, msg_type='moder_order_msg', title=title,
                                   text=comment,
                                   description='0',
                                   lang='en', from_id=user_id[0][0], to_id=order.creator_id,
