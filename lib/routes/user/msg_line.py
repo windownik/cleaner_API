@@ -209,3 +209,34 @@ async def read_message(access_token: str, msg_id: int, db=Depends(data_b.connect
                                  'desc': 'Status and read inform of msg was updated'},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.delete(path='/message', tags=['Message'], responses=get_msg_by_id_res)
+async def read_message(access_token: str, msg_id: int, db=Depends(data_b.connection)):
+    """Use it if user open want to delete msg.\n
+    access_token: This is access auth token. You can get it when create account or login"""
+    user_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not user_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+    user_id = user_id[0][0]
+
+    msg_data = await conn.read_data(db=db, table='message_line', id_name='id', id_data=msg_id)
+    if not msg_data:
+        return JSONResponse(content={"ok": True,
+                                     'message': 'No msg in database'},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    if user_id != msg_data[0]['to_id']:
+        return JSONResponse(content={"ok": True,
+                                     'message': "You haven't rights"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    await conn.update_data(table='message_line', id_name='id', name='deleted_date', data=datetime.datetime.now(),
+                           id_data=msg_id, db=db)
+    await conn.update_data(table='message_line', id_name='id', name='status', data='delete', id_data=msg_id, db=db)
+
+    return JSONResponse(content={"ok": True,
+                                 'desc': 'Status and read inform of msg was updated'},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
