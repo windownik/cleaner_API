@@ -36,8 +36,18 @@ async def update_user_information(user_id: int, status: str, access_token: str, 
                                      'description': 'Bad users status', })
 
     admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
+    owner_id = await conn.get_token(db=db, token_type='access', token=access_token)
 
-    if not admin_id:
+    if admin_id:
+        pass
+    elif owner_id:
+        if owner_id[0][0] == user_id:
+            pass
+        else:
+            return JSONResponse(content={"ok": False,
+                                         'description': "bad access token or not enough rights"},
+                                status_code=_status.HTTP_401_UNAUTHORIZED)
+    else:
         return JSONResponse(content={"ok": False,
                                      'description': "bad access token or not enough rights"},
                             status_code=_status.HTTP_401_UNAUTHORIZED)
