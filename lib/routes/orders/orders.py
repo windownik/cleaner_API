@@ -254,7 +254,7 @@ async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
         _order = Order()
         _order.from_db(order)
         orders_list.append(_order.dict())
-        if _order.status not in ('close', 'ban', 'finish', 'deleted'):
+        if _order.status not in ('close', 'ban', 'finish', 'delete'):
             orders_in_deal.append(_order.order_id)
 
     return JSONResponse(content={"ok": True,
