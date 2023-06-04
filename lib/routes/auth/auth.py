@@ -98,7 +98,7 @@ async def sign_in_user(auth_token: str, auth_type: str, refresh_token: str, fb_a
     if not user_id:
         return JSONResponse(content="bad access token or now rights",
                             status_code=_status.HTTP_401_UNAUTHORIZED)
-    user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='user_id', id_data=user_id)
+    user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='user_id', id_data=user_id[0][0])
     email = user_data[0]['email']
 
     if auth_type == 'fb':
