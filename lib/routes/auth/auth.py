@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import starlette.status as _status
@@ -79,6 +80,52 @@ async def login_user(email: str, auth_type: str, auth_id: int, access_token: str
                                  'user': user.get_user_json(),
                                  'access_token': access[0][0],
                                  'refresh_token': refresh[0][0]
+                                 },
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.get(path='/sign_in', tags=['Auth'], responses=login_get_res)
+async def sign_in_user(auth_token: str, auth_type: str, refresh_token: str, fb_auth_id: int = 0,
+                       db=Depends(data_b.connection)):
+    """
+    Sign_in user in service by fb or google\n
+    auth_token: token from google or facebook\n
+    auth_type: can be fb or google\n
+    refresh_token: old refresh token from service\n
+    """
+    user_id = await conn.get_token(db=db, token_type='refresh', token=refresh_token)
+    if not user_id:
+        return JSONResponse(content="bad access token or now rights",
+                            status_code=_status.HTTP_401_UNAUTHORIZED)
+    user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='user_id', id_data=user_id)
+    email = user_data[0]['email']
+
+    if auth_type == 'fb':
+        if not await user_fb_check_auth(auth_token, user_id=fb_auth_id, email=email):
+            return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
+                                content={"ok": False,
+                                         'description': 'Bad auth_id or access_token', })
+    elif auth_type == 'google':
+        if not user_google_check_auth(access_token=auth_token, email=email):
+            return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
+                                content={"ok": False,
+                                         'description': 'Bad auth_id or access_token', })
+    else:
+        return JSONResponse(status_code=_status.HTTP_400_BAD_REQUEST,
+                            content={"ok": False,
+                                     'description': 'The selected auth type is not supported', })
+
+    user = User(user_data[0])
+
+    access = await conn.create_token(db=db, user_id=user.user_id, token_type='access')
+    if user_id[0][1] > (datetime.datetime.now() - datetime.timedelta(days=3)):
+        refresh_token = await conn.create_token(db=db, user_id=user.user_id, token_type='refresh')
+
+    return JSONResponse(content={"ok": True,
+                                 'user': user.get_user_json(),
+                                 'access_token': access[0][0],
+                                 'refresh_token': refresh_token
                                  },
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})

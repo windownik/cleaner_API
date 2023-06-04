@@ -399,7 +399,7 @@ async def read_data_2_were(db: Depends, table: str, id_name1: str, id_name2: str
 # Проверяем токен на валидность и возвращаем user_id
 async def get_token(db: Depends, token_type: str, token: str):
     now = datetime.datetime.now()
-    data = await db.fetch(f"SELECT user_id FROM token "
+    data = await db.fetch(f"SELECT user_id, death_date FROM token "
                           f"WHERE token_type = $1 "
                           f"AND token = $2 "
                           f"AND death_date > $3 "
