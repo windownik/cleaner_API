@@ -120,7 +120,7 @@ async def sign_in_user(auth_token: str, auth_type: str, refresh_token: str, fb_a
 
     access = await conn.create_token(db=db, user_id=user.user_id, token_type='access')
     if user_id[0][1] > (datetime.datetime.now() - datetime.timedelta(days=3)):
-        refresh_token = await conn.create_token(db=db, user_id=user.user_id, token_type='refresh')
+        refresh_token = (await conn.create_token(db=db, user_id=user.user_id, token_type='refresh'))[0][0]
 
     return JSONResponse(content={"ok": True,
                                  'user': user.get_user_json(),
