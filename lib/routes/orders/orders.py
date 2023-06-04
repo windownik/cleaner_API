@@ -180,7 +180,7 @@ async def update_order(access_token: str, order_id: int, city: str, street: str,
 
 
 @app.put(path='/order_status', tags=['Orders'], responses=create_get_order_res)
-async def admin_confirm_ban_order(order_id: int, status: str, access_token: str, comment: str = '0',
+async def admin_confirm_ban_order(order_id: int, msg_id: int, status: str, access_token: str, comment: str = '0',
                                   db=Depends(data_b.connection)):
     """Admin Send response while order will being checked.\n
     order_id: id of order in dataBase\n
@@ -205,6 +205,9 @@ async def admin_confirm_ban_order(order_id: int, status: str, access_token: str,
     order = Order()
     order.from_db(order_data[0])
 
+    await conn.update_data(db=db, table='message_line', name='status', id_data=msg_id, data="delete", id_name='id')
+    await conn.update_data(db=db, table='message_line', name='deleted_date', id_data=msg_id,
+                           data=datetime.datetime.now(), id_name='id')
     await conn.update_data(db=db, table='orders', name='status', id_data=order_id, data=status, id_name='order_id')
     await conn.update_data(db=db, table='orders', name='status_date', id_data=order_id, data=datetime.datetime.now(),
                            id_name='order_id')
