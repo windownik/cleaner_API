@@ -242,8 +242,11 @@ async def admin_confirm_ban_order(order_id: int, msg_id: int, status: str, acces
                               description=status,
                               lang=lang[0][0], from_id=user_id[0][0], to_id=order.creator_id,
                               user_type='user', db=db)
-        send_push(fcm_token=push_token[0][0], title=title, body=text, main_text=comment,
-                  push_type='moder_order_msg')
+        try:
+            send_push(fcm_token=push_token[0][0], title=title, body=text, main_text=comment,
+                      push_type='moder_order_msg')
+        except Exception as _ex:
+            print(_ex)
 
     return JSONResponse(content={"ok": True,
                                  'description': "Order successfully updated."},
