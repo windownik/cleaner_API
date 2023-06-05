@@ -192,7 +192,7 @@ async def admin_confirm_ban_order(order_id: int, msg_id: int, status: str, acces
         return Response(content="bad access token or now rights",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
-    if status not in ('ban', 'return', 'confirm'):
+    if status not in ('ban', 'return', 'search_worker'):
         return Response(content="bad new status",
                         status_code=_status.HTTP_400_BAD_REQUEST)
 
@@ -211,25 +211,31 @@ async def admin_confirm_ban_order(order_id: int, msg_id: int, status: str, acces
     await conn.update_data(db=db, table='orders', name='status', id_data=order_id, data=status, id_name='order_id')
     await conn.update_data(db=db, table='orders', name='status_date', id_data=order_id, data=datetime.datetime.now(),
                            id_name='order_id')
+    lang = await conn.read_data(table='all_users', id_name='user_id', id_data=user_id[0][0], name='lang', db=db)
+    push_token = await conn.read_data(db=db, table='all_users', name='push', id_name='user_id',
+                                      id_data=order.creator_id)
+    if lang[0][0] == 'ru':
+        title = 'Сообщение от модератора'
+    elif lang[0][0] == 'he':
+        title = 'Message from moderator'
+    else:
+        title = 'Message from moderator'
 
-    if comment != '0':
-        push_token = await conn.read_data(db=db, table='all_users', name='push', id_name='user_id',
-                                          id_data=order.creator_id)
-        if push_token:
-            lang = await conn.read_data(table='all_users', id_name='user_id', id_data=user_id[0][0], name='lang', db=db)
-            if lang[0][0] == 'ru':
-                title = 'Сообщение от модератора'
-            elif lang[0][0] == 'he':
-                title = 'Message from moderator'
-            else:
-                title = 'Message from moderator'
-            await conn.create_msg(msg_id=order.order_id, msg_type='moder_order_msg', title=title,
-                                  text=comment,
-                                  description='0',
-                                  lang='en', from_id=user_id[0][0], to_id=order.creator_id,
-                                  user_type='user', db=db)
-            send_push(fcm_token=push_token[0][0], title='Message from moderator', body=comment, main_text=comment,
-                      push_type='moder_order_msg')
+    if lang[0][0] == 'ru':
+        text = 'Сообщение от модератора\nСтатус вашего заказа обновлен'
+    elif lang[0][0] == 'he':
+        text = 'Message from moderator\nYour order status has been updated'
+    else:
+        text = 'Message from moderator\nYour order status has been updated'
+
+    if push_token:
+        await conn.create_msg(msg_id=order.order_id, msg_type='moder_order_msg', title=title,
+                              text=text,
+                              description=comment,
+                              lang='en', from_id=user_id[0][0], to_id=order.creator_id,
+                              user_type='user', db=db)
+        send_push(fcm_token=push_token[0][0], title='Message from moderator', body=comment, main_text=comment,
+                  push_type='moder_order_msg')
 
     return JSONResponse(content={"ok": True,
                                  'description': "Order successfully updated."},
@@ -277,7 +283,7 @@ async def admin_get_all_orders(access_token: str, db=Depends(data_b.connection))
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
-    orders_data = await conn.admin_read_orders(db=db,)
+    orders_data = await conn.admin_read_orders(db=db, )
     orders_count = len(orders_data)
 
     orders_list = []
