@@ -240,9 +240,9 @@ async def admin_confirm_ban_order(order_id: int, msg_id: int, status: str, acces
         await conn.create_msg(msg_id=order.order_id, msg_type='order_comment', title=title,
                               text=text,
                               description=status,
-                              lang='en', from_id=user_id[0][0], to_id=order.creator_id,
+                              lang=lang[0][0], from_id=user_id[0][0], to_id=order.creator_id,
                               user_type='user', db=db)
-        send_push(fcm_token=push_token[0][0], title='Message from moderator', body=comment, main_text=comment,
+        send_push(fcm_token=push_token[0][0], title=title, body=text, main_text=comment,
                   push_type='moder_order_msg')
 
     return JSONResponse(content={"ok": True,
