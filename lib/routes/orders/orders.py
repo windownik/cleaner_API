@@ -221,17 +221,25 @@ async def admin_confirm_ban_order(order_id: int, msg_id: int, status: str, acces
     else:
         title = 'Message from moderator'
 
-    if lang[0][0] == 'ru':
-        text = 'Сообщение от модератора\nСтатус вашего заказа обновлен'
-    elif lang[0][0] == 'he':
-        text = 'Message from moderator\nYour order status has been updated'
+    if comment == 0:
+        if lang[0][0] == 'ru':
+            text = 'Сообщение от модератора\nСтатус вашего заказа обновлен'
+        elif lang[0][0] == 'he':
+            text = 'Message from moderator\nYour order status has been updated'
+        else:
+            text = 'Message from moderator\nYour order status has been updated'
     else:
-        text = 'Message from moderator\nYour order status has been updated'
+        if lang[0][0] == 'ru':
+            text = f'Сообщение от модератора\n{comment}'
+        elif lang[0][0] == 'he':
+            text = f'Message from moderator\n{comment}'
+        else:
+            text = f'Message from moderator\n{comment}'
 
     if push_token:
-        await conn.create_msg(msg_id=order.order_id, msg_type='moder_order_msg', title=title,
+        await conn.create_msg(msg_id=order.order_id, msg_type='order_comment', title=title,
                               text=text,
-                              description=comment,
+                              description=status,
                               lang='en', from_id=user_id[0][0], to_id=order.creator_id,
                               user_type='user', db=db)
         send_push(fcm_token=push_token[0][0], title='Message from moderator', body=comment, main_text=comment,
