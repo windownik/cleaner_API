@@ -228,6 +228,36 @@ class Review:
         }
 
 
+class Order_Comment:
+    comment_id: int
+    order_id: int
+    user_id: int
+    title: str
+    text: str
+    description: str
+    create_date: datetime.datetime
+
+    def from_db(self, data: dict):
+        self.comment_id = data['id']
+        self.order_id = data['msg_id']
+        self.user_id = data['from_id']
+        self.title = data['title']
+        self.text = data['text']
+        self.description = data['description']
+        self.create_date = data['create_date']
+
+    def dict(self):
+        return {
+            'comment_id': self.comment_id,
+            'order_id': self.order_id,
+            'user_id': self.user_id,
+            'title': self.title,
+            'text': self.review_status,
+            'description': self.description,
+            'create_date': str(self.review_date)
+        }
+
+
 class Order:
     order_id: int
     creator_id: int

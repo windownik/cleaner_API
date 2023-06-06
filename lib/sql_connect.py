@@ -291,6 +291,13 @@ async def admin_read_orders(db: Depends,):
 
 
 # получаем данные с одним фильтром
+async def get_orders_comment(db: Depends, order_id: int, user_to: int):
+    data = await db.fetch(f"SELECT * FROM message_line WHERE msg_type='order_comment' AND to_id=$1 "
+                          f"AND msg_id=$2 ORDER BY id;", user_to, order_id)
+    return data
+
+
+# получаем данные с одним фильтром
 async def admin_read_users(offset: int, limit: int, db: Depends,):
     data = await db.fetch(f"SELECT * FROM all_users ORDER BY user_id DESC OFFSET $1 LIMIT $2;", offset, limit)
     return data

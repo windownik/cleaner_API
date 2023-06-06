@@ -6,7 +6,7 @@ from fastapi import Depends
 from starlette.responses import Response, JSONResponse
 
 from lib import sql_connect as conn
-from lib.db_objects import Order, User
+from lib.db_objects import Order, User, Message
 from lib.response_examples import *
 from lib.routes.push.push_func import send_push
 from lib.sql_connect import data_b, app
@@ -104,11 +104,20 @@ async def get_order(order_id: int, access_token: str, db=Depends(data_b.connecti
     order.from_db(order_data[0])
 
     user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='user_id', id_data=order.creator_id)
-
     user = User(user_data[0])
+
+    admin_comments = []
+    admin_comments_data = await conn.get_orders_comment(db=db, order_id=order_id, user_to=order.creator_id)
+
+    for msg_data in admin_comments_data:
+        msg = Message(data=msg_data)
+        admin_comments.append(
+            msg.get_msg_json()
+        )
 
     return JSONResponse(content={"ok": True,
                                  'order': order.dict(),
+                                 "admin_comments": admin_comments,
                                  'from_user': user.get_user_json()},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
