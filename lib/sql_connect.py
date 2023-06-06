@@ -292,13 +292,13 @@ async def admin_read_orders(db: Depends,):
 
 # получаем данные с одним фильтром
 async def get_orders_comment(db: Depends, order_id: int, user_to: int, admin: bool):
-    print(1111)
-    print(admin)
     admin_sql = ''
+    to_sql = ''
     if admin:
         admin_sql = " OR msg_type='order_rework'"
-    print(admin_sql)
-    data = await db.fetch(f"SELECT * FROM message_line WHERE (msg_type='order_comment'{admin_sql}) AND to_id=$1 "
+        to_sql = " OR to_id=0"
+    data = await db.fetch(f"SELECT * FROM message_line "
+                          f"WHERE (msg_type='order_comment'{admin_sql}) AND (to_id=$1{to_sql}) "
                           f"AND msg_id=$2 ORDER BY id DESC;", user_to, order_id)
     return data
 
