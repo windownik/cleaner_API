@@ -273,8 +273,7 @@ async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
-    orders_data = await conn.read_data_order(db=db, table='orders', id_name='creator_id', id_data=user_id[0][0],
-                                             order='order_id')
+    orders_data = await conn.read_data_order(db=db, table='orders', id_name='creator_id', id_data=user_id[0][0])
 
     orders_list = []
     orders_in_deal = []
@@ -286,7 +285,7 @@ async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
         if _order.status not in ('close', 'ban', 'finish', 'delete'):
             orders_in_deal.append(_order.order_id)
 
-    return JSONResponse(content={"ok": 'Desc',
+    return JSONResponse(content={"ok": True,
                                  "orders_in_deal": orders_in_deal,
                                  'orders': orders_list},
                         status_code=_status.HTTP_200_OK,
