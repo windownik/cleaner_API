@@ -268,7 +268,7 @@ async def read_data(db: Depends, table: str, id_name: str, id_data, name: str = 
 
 # получаем данные с одним фильтром
 async def read_data_order(db: Depends, table: str, id_name: str, id_data, order: str, name: str = '*'):
-    data = await db.fetch(f"SELECT {name} FROM {table} WHERE {id_name} = $1 ORDER BY $2;", id_data, order)
+    data = await db.fetch(f"SELECT {name} FROM {table} WHERE {id_name} = $1 ORDER BY $2 DESC;", id_data, order)
     return data
 
 
