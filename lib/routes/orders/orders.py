@@ -188,7 +188,7 @@ async def update_order(access_token: str, order_id: int, city: str, street: str,
                           text=f'Пользователь сменил комментарий\n'
                                f'Старый: {order_data_1[0]["comment"]}\n\n'
                                f'Новый: {order_data[0]["comment"]}',
-                          description='0',
+                          description='return',
                           lang='ru', from_id=user_id[0][0], to_id=0, user_type='admin', db=db)
 
     return JSONResponse(content={"ok": True,
