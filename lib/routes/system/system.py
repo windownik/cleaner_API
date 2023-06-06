@@ -50,12 +50,6 @@ def generate_html_response():
     return HTMLResponse(content=html_content, status_code=200)
 
 
-@data_b.on_init
-async def initialization(connect):
-    # you can run your db initialization code here
-    await connect.execute("SELECT 1")
-
-
 @app.get('/', response_class=HTMLResponse, tags=['System'])
 async def main_page():
     """main page"""

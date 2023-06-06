@@ -493,6 +493,8 @@ create_get_order_res = {
                     "odd": {
                         "summary": "Success",
                         "value": {"ok": True,
+                                  'from_user': "{user object here}",
+                                  "admin_comments": ["{message object here}","{message object here}"],
                                   'order': {
                                       "ok": True,
                                       "order": {
