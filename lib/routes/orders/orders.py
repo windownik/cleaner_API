@@ -91,6 +91,7 @@ async def get_order(order_id: int, access_token: str, db=Depends(data_b.connecti
     order_id: id of order in dataBase\n
     access_token: access token in our service"""
     user_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    admin_id = await conn.get_token_admin(db=db, token_type='access', token=access_token)
     if not user_id:
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
@@ -107,7 +108,8 @@ async def get_order(order_id: int, access_token: str, db=Depends(data_b.connecti
     user = User(user_data[0])
 
     admin_comments = []
-    admin_comments_data = await conn.get_orders_comment(db=db, order_id=order_id, user_to=order.creator_id)
+    admin_comments_data = await conn.get_orders_comment(db=db, order_id=order_id, user_to=order.creator_id,
+                                                        admin=False if not admin_id else True)
 
     for msg_data in admin_comments_data:
         msg = Message(data=msg_data)
@@ -147,8 +149,8 @@ async def update_order(access_token: str, order_id: int, city: str, street: str,
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
-    order_data = await conn.read_data(db=db, name='*', table='orders', id_name='order_id', id_data=order_id)
-    if not order_data:
+    order_data_1 = await conn.read_data(db=db, name='*', table='orders', id_name='order_id', id_data=order_id)
+    if not order_data_1:
         return JSONResponse(content={"ok": False,
                                      'description': "Bad order_id"},
                             status_code=_status.HTTP_400_BAD_REQUEST)
@@ -181,6 +183,14 @@ async def update_order(access_token: str, order_id: int, city: str, street: str,
 
     order = Order()
     order.from_db(order_data[0])
+
+    await conn.create_msg(msg_id=order.order_id, msg_type='order_rework', title='Изменения ордера',
+                          text=f'Пользователь сменил комментарий\n'
+                               f'Старый: {order_data_1[0]["comment"]}\n\n'
+                               f'Новый: {order_data[0]["comment"]}',
+                          description='0',
+                          lang='ru', from_id=user_id[0][0], to_id=0, user_type='admin', db=db)
+
     return JSONResponse(content={"ok": True,
                                  'description': 'order successfully updated',
                                  'order': order.dict()},
