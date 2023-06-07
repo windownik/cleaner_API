@@ -240,20 +240,20 @@ async def admin_confirm_ban_order(order_id: int, msg_id: int, status: str, acces
     else:
         title = 'Message from moderator'
 
-    if comment == 0:
+    if comment == '0':
         if lang[0][0] == 'ru':
-            text = 'Сообщение от модератора\nСтатус вашего заказа обновлен'
+            text = 'Статус вашего заказа обновлен'
         elif lang[0][0] == 'he':
-            text = 'Message from moderator\nYour order status has been updated'
+            text = 'Your order status has been updated'
         else:
-            text = 'Message from moderator\nYour order status has been updated'
+            text = 'Your order status has been updated'
     else:
         if lang[0][0] == 'ru':
-            text = f'Сообщение от модератора\n{comment}'
+            text = f'Статус вашего заказа обновлен\nКомментарий\n{comment}'
         elif lang[0][0] == 'he':
-            text = f'Message from moderator\n{comment}'
+            text = f'Your order status has been updated\nComment\n{comment}'
         else:
-            text = f'Message from moderator\n{comment}'
+            text = f'Your order status has been updated\nComment\n{comment}'
 
     if push_token:
         await conn.create_msg(msg_id=order.order_id, msg_type='order_comment', title=title,
