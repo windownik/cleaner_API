@@ -230,9 +230,11 @@ async def read_message(access_token: str, msg_id: int, db=Depends(data_b.connect
                             status_code=_status.HTTP_400_BAD_REQUEST)
 
     if user_id != msg_data[0]['to_id']:
-        return JSONResponse(content={"ok": True,
-                                     'message': "You haven't rights"},
-                            status_code=_status.HTTP_400_BAD_REQUEST)
+        admin = await conn.get_token_admin(db=db, token_type='access', token=access_token)
+        if not admin or msg_data[0]['to_id'] != 0:
+            return JSONResponse(content={"ok": True,
+                                         'message': "You haven't rights"},
+                                status_code=_status.HTTP_400_BAD_REQUEST)
 
     await conn.update_data(table='message_line', id_name='id', name='deleted_date', data=datetime.datetime.now(),
                            id_data=msg_id, db=db)
