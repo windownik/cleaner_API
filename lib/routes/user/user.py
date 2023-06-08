@@ -199,6 +199,55 @@ async def update_image_link(image_link: str, access_token: str, db=Depends(data_
                         headers={'content-type': 'application/json; charset=utf-8'})
 
 
+@app.put(path='/user_lang', tags=['User'], responses=update_user_res)
+async def update_language(lang: str, access_token: str, db=Depends(data_b.connection)):
+    """Update user's language.
+
+    lang: can be ru, en, he\n
+    access_token: This is access auth token. You can get it when create account, login or\n
+    """
+
+    my_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not my_id:
+        return JSONResponse(content={"ok": False, "description": "bad access token"},
+                            status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    if lang not in ('ru', 'en', 'he'):
+        return JSONResponse(content={"ok": False, "description": "language cod not valid"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    await conn.update_data(db=db, name='lang', data=lang, id_name='user_id', id_data=my_id[0][0],
+                           table='all_users')
+    return JSONResponse(content={"ok": True,
+                                 'desc': 'all users information updated'},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.put(path='/user_geo', tags=['User'], responses=update_user_res)
+async def update_users_geo_position(latitude: float, longitude: float, access_token: str, db=Depends(data_b.connection)):
+    """Update user's geo latitude and longitude.
+
+    latitude: geo position latitude\n
+    longitude: geo position longitude\n
+    access_token: This is access auth token. You can get it when create account, login or\n
+    """
+
+    my_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not my_id:
+        return JSONResponse(content={"ok": False, "description": "bad access token"},
+                            status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    await conn.update_data(db=db, name='latitudes', data=latitude, id_name='user_id', id_data=my_id[0][0],
+                           table='all_users')
+    await conn.update_data(db=db, name='longitudes', data=longitude, id_name='user_id', id_data=my_id[0][0],
+                           table='all_users')
+    return JSONResponse(content={"ok": True,
+                                 'desc': 'all users information updated'},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
 @app.get(path='/get_user_by_id', tags=['User'], responses=get_me_res)
 async def get_user_by_id(user_id: int, access_token: str, db=Depends(data_b.connection), ):
     """Return user with user_id.\n
