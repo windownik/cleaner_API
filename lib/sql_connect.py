@@ -156,6 +156,8 @@ async def create_order_table(db):
  object_size INTEGER DEFAULT 0,
  comment TEXT DEFAULT '0',
  status TEXT DEFAULT 'created',
+ work_type TEXT DEFAULT 'clean',
+ search_count INTEGER DEFAULT 0,
  review_status TEXT DEFAULT 'no_created',
  review_text TEXT DEFAULT '0',
  score INTEGER DEFAULT 0,
@@ -364,6 +366,15 @@ async def read_all_msg(db: Depends, user_id: int, offset: int = 0, limit: int = 
     data = await db.fetch(f"SELECT * FROM message_line "
                           f"WHERE (to_id=$1 OR (to_id=0 AND user_type='admin')) "
                           f"AND (status='created' OR status='read') ORDER BY id DESC{offset_limit};", user_id)
+    return data
+
+
+# получаем все новые сообщения для пользователя с id
+async def read_job_app_msg(db: Depends, order_id: int,):
+
+    data = await db.fetch(f"SELECT * FROM message_line "
+                          f"WHERE msg_id=$1 AND msg_type='job_application' "
+                          f"AND (status='created' OR status='read') ORDER BY id DESC;", order_id)
     return data
 
 
