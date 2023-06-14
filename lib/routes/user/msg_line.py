@@ -127,7 +127,7 @@ async def user_get_orders_app_jobs(access_token: str, order_id: int, db=Depends(
     msg_list = []
 
     for _msg_data in msg_data:
-        user_data = await conn.read_data(db=db, table='all_users', id_name="user_id", id_data=_msg_data['to_id'])
+        user_data = await conn.read_data(db=db, table='all_users', id_name="user_id", id_data=_msg_data['from_id'])
         msg = Message(data=_msg_data, user_from=user_data[0])
         msg_list.append(
             msg.get_msg_json()
