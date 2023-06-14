@@ -6,7 +6,7 @@ from fastapi import Depends
 from starlette.responses import Response, JSONResponse
 
 from lib import sql_connect as conn
-from lib.db_objects import Message
+from lib.db_objects import Message, User
 from lib.response_examples import *
 from lib.routes.push.push import send_push_notification
 from lib.sql_connect import data_b, app
@@ -127,13 +127,15 @@ async def user_get_orders_app_jobs(access_token: str, order_id: int, db=Depends(
     msg_list = []
 
     for _msg_data in msg_data:
-        msg = Message(data=_msg_data)
+        user_data = await conn.read_data(db=db, table='all_users', id_name="user_id", id_data=_msg_data['to_id'])
+        msg = Message(data=_msg_data, user_from=user_data[0])
         msg_list.append(
             msg.get_msg_json()
         )
     return JSONResponse(content={"ok": True,
                                  'count': len(msg_data),
-                                 'msg_list': msg_list},
+                                 'msg_list': msg_list,
+                                 },
 
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
