@@ -273,7 +273,7 @@ async def admin_confirm_ban_order(order_id: int, msg_id: int, status: str, acces
                         headers={'content-type': 'application/json; charset=utf-8'})
 
 
-@app.post(path='/order_worker', tags=['Orders'], responses=create_get_order_res)
+@app.post(path='/pick_worker', tags=['Orders'], responses=create_get_order_res)
 async def user_pick_worker_for_order(order_id: int, user_id: int, access_token: str, db=Depends(data_b.connection)):
     """Customer Send response while order will being checked.\n
     order_id: id of order in dataBase\n
