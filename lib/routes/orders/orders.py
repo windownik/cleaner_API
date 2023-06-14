@@ -296,10 +296,11 @@ async def user_pick_worker_for_order(order_id: int, user_id: int, access_token: 
                                      'description': "Bad user_id"},
                             status_code=_status.HTTP_400_BAD_REQUEST)
 
-    if order_data[0]['creator_id'] != user_id:
+    if order_data[0]['creator_id'] != creator_id[0][0]:
         return JSONResponse(content={"ok": False,
                                      'description': "not enough rights"},
                             status_code=_status.HTTP_400_BAD_REQUEST)
+    await conn.update_data(db=db, table='orders', name='worker_id', id_data=order_id, data=user_id, id_name='order_id')
     await conn.update_data(db=db, table='orders', name='status', id_data=order_id, data='in_deal', id_name='order_id')
     await conn.update_data(db=db, table='orders', name='status_date', id_data=order_id, data=datetime.datetime.now(),
                            id_name='order_id')
