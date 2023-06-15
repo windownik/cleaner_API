@@ -34,7 +34,7 @@ async def create_all_users_table(db):
  city TEXT DEFAULT '0',
  street TEXT DEFAULT '0',
  house TEXT DEFAULT '0',
- score BIGINT DEFAULT 5,
+ score DOUBLE PRECISION DEFAULT 0,
  score_count BIGINT DEFAULT 0,
  total_score BIGINT DEFAULT 0,
  status TEXT DEFAULT 'worker',
@@ -158,7 +158,7 @@ async def create_order_table(db):
  status TEXT DEFAULT 'created',
  work_type TEXT DEFAULT 'clean',
  search_count INTEGER DEFAULT 0,
- review_status TEXT DEFAULT 'no_created',
+ review_status TEXT DEFAULT 'no',
  review_text TEXT DEFAULT '0',
  score INTEGER DEFAULT 0,
  review_date timestamp,
@@ -480,6 +480,20 @@ async def update_user(db: Depends, name: str, phone: int, email: str, descriptio
 async def update_data(db: Depends, table: str, name: str, id_data, data, id_name: str = 'id'):
     await db.execute(f"UPDATE {table} SET {name}=$1 WHERE {id_name}=$2;",
                      data, id_data)
+
+
+# Обновляем информацию
+async def update_review(db: Depends, review_text: str, score: int, order_id: int):
+    await db.execute(f"UPDATE orders SET review_status=$1, review_text=$2, score=$3 review_date=$4 WHERE order_id=$5;",
+                     "created", review_text, score, datetime.datetime.now(), order_id)
+
+
+# Обновляем информацию
+async def update_worker_review(db: Depends, score: int, user_id: int):
+    await db.execute(f"UPDATE all_users "
+                     f"SET score=(score+$1)/(score_count+1), score_count=score_count+1, total_score=total_score+$2 "
+                     f"WHERE user_id=$3;",
+                     score, score, user_id)
 
 
 # Обновляем информацию в msg

@@ -322,12 +322,133 @@ async def user_pick_worker_for_order(order_id: int, user_id: int, access_token: 
                           user_type='user', db=db)
     try:
         send_push(fcm_token=user_data[0]['push'], title=title, body=text, main_text='0',
-                  push_type='moder_order_msg')
+                  push_type='order_msg')
     except Exception as _ex:
         print(_ex)
 
     return JSONResponse(content={"ok": True,
                                  'description': "Order successfully updated."},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.put(path='/finish_order', tags=['Orders'], responses=create_get_order_res)
+async def user_finish_order(order_id: int, access_token: str, db=Depends(data_b.connection)):
+    """Customer close order while work is finished.\n
+    order_id: id of order in dataBase\n
+    access_token: access token in our service"""
+    creator_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not creator_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    order_data = await conn.read_data(db=db, name='*', table='orders', id_name='order_id', id_data=order_id)
+    if not order_data:
+        return JSONResponse(content={"ok": False,
+                                     'description': "Bad order_id"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+    user_id = order_data[0]['worker_id']
+    user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='user_id', id_data=user_id)
+    if not user_data:
+        return JSONResponse(content={"ok": False,
+                                     'description': "there is no worker in the order"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    if order_data[0]['creator_id'] != creator_id[0][0]:
+        return JSONResponse(content={"ok": False,
+                                     'description': "not enough rights"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    await conn.update_data(db=db, table='orders', name='status', id_data=order_id, data='finish', id_name='order_id')
+    await conn.update_data(db=db, table='orders', name='status_date', id_data=order_id, data=datetime.datetime.now(),
+                           id_name='order_id')
+
+    if user_data[0]['lang'] == 'ru':
+        title = 'Заказ успешно закрыт'
+        text = 'Поздравляем вы успешно закрыли заказ. Желаем удачи в следующих ваших работах'
+    elif user_data[0]['lang'] == 'he':
+        title = 'Order closed successfully'
+        text = 'Congratulations, you have successfully completed your order. We wish you good luck in your next works.'
+    else:
+        title = 'Order closed successfully'
+        text = 'Congratulations, you have successfully completed your order. We wish you good luck in your next works.'
+
+    await conn.create_msg(msg_id=order_id, msg_type='order_comment', title=title,
+                          text=text,
+                          description='finish',
+                          lang=user_data[0]['lang'], from_id=creator_id[0][0], to_id=user_id,
+                          user_type='user', db=db)
+    try:
+        send_push(fcm_token=user_data[0]['push'], title=title, body=text, main_text='0',
+                  push_type='order_msg')
+    except Exception as _ex:
+        print(_ex)
+
+    return JSONResponse(content={"ok": True,
+                                 'description': "Order successfully closed."},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
+
+
+@app.post(path='/create_review', tags=['Orders'], responses=create_get_order_res)
+async def user_pick_worker_for_order(order_id: int, review_text: str, review_score: int, access_token: str,
+                                     db=Depends(data_b.connection)):
+    """Customer Send response while order will being checked.\n
+    order_id: id of order in dataBase\n
+    user_id: id of order in dataBase\n
+    access_token: access token in our service"""
+    creator_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not creator_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    order_data = await conn.read_data(db=db, name='*', table='orders', id_name='order_id', id_data=order_id)
+    if not order_data:
+        return JSONResponse(content={"ok": False,
+                                     'description': "Bad order_id"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    user_id = order_data[0]['worker_id']
+    user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='user_id', id_data=user_id)
+    if not user_data:
+        return JSONResponse(content={"ok": False,
+                                     'description': "there is no worker in the order"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    if order_data[0]['creator_id'] != creator_id[0][0]:
+        return JSONResponse(content={"ok": False,
+                                     'description': "not enough rights"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    await conn.update_review(db=db, order_id=order_id, review_text=review_text, score=review_score)
+    await conn.update_worker_review(db=db, score=review_score, user_id=user_id)
+
+    if user_data[0]['lang'] == 'ru':
+        title = 'Заказчик оставил отзыв'
+        text = review_text
+        description = str(review_score)
+    elif user_data[0]['lang'] == 'he':
+        title = 'You have a new order'
+        text = review_text
+        description = str(review_score)
+    else:
+        title = 'You have a new order'
+        text = review_text
+        description = str(review_score)
+
+    await conn.create_msg(msg_id=order_id, msg_type='order_comment', title=title,
+                          text=text,
+                          description=description,
+                          lang=user_data[0]['lang'], from_id=creator_id[0][0], to_id=user_id,
+                          user_type='review', db=db)
+    try:
+        send_push(fcm_token=user_data[0]['push'], title=title, body=text, main_text=str(review_score),
+                  push_type='order_msg')
+    except Exception as _ex:
+        print(_ex)
+
+    return JSONResponse(content={"ok": True,
+                                 'description': "Review successfully created"},
                         status_code=_status.HTTP_200_OK,
                         headers={'content-type': 'application/json; charset=utf-8'})
 
