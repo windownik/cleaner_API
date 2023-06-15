@@ -484,7 +484,7 @@ async def update_data(db: Depends, table: str, name: str, id_data, data, id_name
 
 # Обновляем информацию
 async def update_review(db: Depends, review_text: str, score: int, order_id: int):
-    await db.execute(f"UPDATE orders SET review_status=$1, review_text=$2, score=$3 review_date=$4 WHERE order_id=$5;",
+    await db.execute(f"UPDATE orders SET review_status=$1, review_text=$2, score=$3, review_date=$4 WHERE order_id=$5;",
                      "created", review_text, score, datetime.datetime.now(), order_id)
 
 
