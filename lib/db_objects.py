@@ -228,7 +228,7 @@ class Review:
         }
 
 
-class Order_Comment:
+class OrderComment:
     comment_id: int
     order_id: int
     user_id: int
@@ -262,6 +262,8 @@ class Order:
     order_id: int
     creator_id: int
     worker_id: int
+    worker: User = None
+    customer: User = None
     address: OrderAddress
     object_type_id: int
     object_name_ru: str
@@ -275,12 +277,20 @@ class Order:
     status_date: datetime.datetime
     create_date: datetime.datetime
 
-    def from_db(self, data: dict):
+    def from_db(self, data: dict, customer_data: dict = None, worker_data: dict = None, ):
         order_address = OrderAddress()
         order_address.from_db(data)
 
         review = Review()
         review.from_db(data)
+
+        if customer_data is not None:
+            customer = User(customer_data)
+            self.customer = customer
+
+        if worker_data is not None:
+            worker = User(worker_data)
+            self.worker = worker
 
         self.order_id = data['order_id']
         self.creator_id = data['creator_id']
@@ -299,7 +309,7 @@ class Order:
         self.create_date = data['create_date']
 
     def dict(self):
-        return {
+        resp = {
             'order_id': self.order_id,
             'creator_id': self.creator_id,
             'worker_id': self.worker_id,
@@ -316,3 +326,11 @@ class Order:
             'status_date': str(self.status_date),
             'create_date': str(self.create_date),
         }
+        if self.customer is not None:
+            resp['customer'] = self.customer.get_user_json()
+
+        if self.worker is not None:
+            resp['worker'] = self.worker.get_user_json()
+
+        return resp
+

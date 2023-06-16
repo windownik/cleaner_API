@@ -274,6 +274,12 @@ async def read_data_order(db: Depends, table: str, id_name: str, id_data, name: 
     return data
 
 
+# получаем данные обзоров
+async def read_users_reviews(db: Depends, user_id: int,):
+    data = await db.fetch(f"SELECT * FROM orders WHERE worker_id=$1 ORDER BY order_id DESC;", user_id, )
+    return data
+
+
 # получаем количество данных с одним фильтром
 async def count_data(db: Depends, table: str, id_name: str, id_data):
     data = await db.fetch(f"SELECT COUNT(*) FROM {table} WHERE {id_name} = $1;", id_data)

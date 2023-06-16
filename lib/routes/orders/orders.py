@@ -6,7 +6,7 @@ from fastapi import Depends
 from starlette.responses import Response, JSONResponse
 
 from lib import sql_connect as conn
-from lib.db_objects import Order, User, Message
+from lib.db_objects import Order, User, Message, Review
 from lib.response_examples import *
 from lib.routes.push.push_func import send_push
 from lib.sql_connect import data_b, app
@@ -455,7 +455,29 @@ async def user_pick_worker_for_order(order_id: int, review_text: str, review_sco
 
 @app.get(path='/get_reviews', tags=['Orders'], responses=get_all_order_res)
 async def user_get_reviews(user_id: int, access_token: str, db=Depends(data_b.connection)):
-    pass
+    creator_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not creator_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    user_data = await conn.read_data(db=db, name='*', table='all_users', id_name='user_id', id_data=user_id)
+    if not user_data:
+        return JSONResponse(content={"ok": False,
+                                     'description': "there is no user with user_id"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+    orders_with_reviews = await conn.read_users_reviews(db=db, user_id=user_id)
+    orders_with_reviews_list = []
+    for one in orders_with_reviews:
+        customer_id = one['creator_id']
+        customer_data = (await conn.read_data(table='all_users', id_name='user_id', id_data=customer_id, db=db))[0]
+        order = Order()
+        order.from_db(data=one, customer_data=customer_data)
+        orders_with_reviews_list.append(order.dict())
+
+    return JSONResponse(content={"ok": True,
+                                 'reviews': orders_with_reviews_list},
+                        status_code=_status.HTTP_200_OK,
+                        headers={'content-type': 'application/json; charset=utf-8'})
 
 
 @app.get(path='/all_orders', tags=['Orders'], responses=get_all_order_res)
