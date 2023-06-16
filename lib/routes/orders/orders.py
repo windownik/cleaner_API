@@ -453,6 +453,11 @@ async def user_pick_worker_for_order(order_id: int, review_text: str, review_sco
                         headers={'content-type': 'application/json; charset=utf-8'})
 
 
+@app.get(path='/get_reviews', tags=['Orders'], responses=get_all_order_res)
+async def user_get_reviews(user_id: int, access_token: str, db=Depends(data_b.connection)):
+    pass
+
+
 @app.get(path='/all_orders', tags=['Orders'], responses=get_all_order_res)
 async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
     """Get all users orders from dataBase.\n
