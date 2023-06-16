@@ -315,7 +315,7 @@ async def user_pick_worker_for_order(order_id: int, user_id: int, access_token: 
         title = 'You have a new order'
         text = 'Congratulations you have chosen to work. Rather contact the customer.'
 
-    await conn.create_msg(msg_id=order_id, msg_type='order_comment', title=title,
+    await conn.create_msg(msg_id=order_id, msg_type='order_you_worker', title=title,
                           text=text,
                           description='in_deal',
                           lang=user_data[0]['lang'], from_id=creator_id[0][0], to_id=user_id,
@@ -373,7 +373,7 @@ async def user_finish_order(order_id: int, access_token: str, db=Depends(data_b.
         title = 'Order closed successfully'
         text = 'Congratulations, you have successfully completed your order. We wish you good luck in your next works.'
 
-    await conn.create_msg(msg_id=order_id, msg_type='order_comment', title=title,
+    await conn.create_msg(msg_id=order_id, msg_type='order_finish', title=title,
                           text=text,
                           description='finish',
                           lang=user_data[0]['lang'], from_id=creator_id[0][0], to_id=user_id,
@@ -436,7 +436,7 @@ async def user_pick_worker_for_order(order_id: int, review_text: str, review_sco
         text = review_text
         description = str(review_score)
 
-    await conn.create_msg(msg_id=order_id, msg_type='order_comment', title=title,
+    await conn.create_msg(msg_id=order_id, msg_type='order_review', title=title,
                           text=text,
                           description=description,
                           lang=user_data[0]['lang'], from_id=creator_id[0][0], to_id=user_id,
