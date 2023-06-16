@@ -6,7 +6,7 @@ from fastapi import Depends
 from starlette.responses import Response, JSONResponse
 
 from lib import sql_connect as conn
-from lib.db_objects import Order, User, Message, Review
+from lib.db_objects import Order, User, Message
 from lib.response_examples import *
 from lib.routes.push.push_func import send_push
 from lib.sql_connect import data_b, app
@@ -490,14 +490,26 @@ async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
         return Response(content="bad access token",
                         status_code=_status.HTTP_401_UNAUTHORIZED)
 
-    orders_data = await conn.read_data_order(db=db, table='orders', id_name='creator_id', id_data=user_id[0][0])
+    orders_data = await conn.read_data_order(db=db, user_id=user_id[0][0])
 
     orders_list = []
     orders_in_deal = []
 
     for order in orders_data:
+        customer_id = order['creator_id']
+        worker_id = order['worker_id']
+        if worker_id == user_id[0][0]:
+            customer_data = (await conn.read_data(table='all_users', id_name='user_id', id_data=customer_id, db=db))[0]
+        else:
+            customer_data = None
+
+        if customer_id == user_id[0][0] and worker_id != 0:
+            worker_data = (await conn.read_data(table='all_users', id_name='user_id', id_data=worker_id, db=db))[0]
+        else:
+            worker_data = None
+
         _order = Order()
-        _order.from_db(order)
+        _order.from_db(order, customer_data=customer_data, worker_data=worker_data)
         orders_list.append(_order.dict())
         if _order.status not in ('close', 'ban', 'finish', 'delete'):
             orders_in_deal.append(_order.order_id)
