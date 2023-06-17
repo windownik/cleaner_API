@@ -324,6 +324,7 @@ async def admin_read_users(offset: int, limit: int, user_type: str, db: Depends,
         user_type_sql = f" WHERE status='customer_checking' OR status='worker_checking'"
     elif user_type != 'all':
         user_type_sql = f" WHERE status='{user_type}'"
+
     offset_sql = f' OFFSET {offset} LIMIT {limit}'
     if skip_limit:
         offset_sql = ''

@@ -97,7 +97,7 @@ async def admin_get_users_with_search(access_token: str, user_type: str = 'all',
             user = User(one)
             users_list.append(user.get_user_json())
     else:
-        users_data = await conn.admin_read_users(db=db, offset=0, limit=0, user_type=user_type,skip_limit=True)
+        users_data = await conn.admin_read_users(db=db, offset=offset, limit=limit, user_type=user_type, skip_limit=True)
         for one in users_data:
             if search not in (one['email']).lower() and search not in (one['name']).lower() \
                     and search not in str(one['phone']):
