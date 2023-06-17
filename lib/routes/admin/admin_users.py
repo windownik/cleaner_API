@@ -68,10 +68,10 @@ async def update_user_information(user_id: int, status: str, access_token: str, 
 
 
 @app.get(path='/admin_get_user', tags=['Admin users'], responses=update_user_status_res)
-async def admin_get_users_with_search(access_token: str, search: str = '0', offset: int = 0, limit: int = 5,
-                                      db=Depends(data_b.connection)):
-    """Admin get users with search and offset.
-
+async def admin_get_users_with_search(access_token: str, user_type: str = 'all', search: str = '0', offset: int = 0,
+                                      limit: int = 5, db=Depends(data_b.connection)):
+    """Admin get users with search and offset.\n
+    user_type: can be: all, worker, customer, admin, all_new\n
     search: substring for searching in email, name and phone\n
     access_token: This is access auth token. You can get it when create account, login or \n"""
 
@@ -81,17 +81,23 @@ async def admin_get_users_with_search(access_token: str, search: str = '0', offs
         return JSONResponse(content={"ok": False,
                                      'description': "bad access token or not enough rights"},
                             status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    if user_type not in ('all', 'worker', 'customer', 'admin', 'all_new'):
+        return JSONResponse(content={"ok": False,
+                                     'description': "bad user_type"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
     search = search.lower()
     users_list = []
     users_count = 0
     if search == "0":
-        users_count = (await conn.count_all(table='all_users', db=db))[0][0]
-        users_data = await conn.admin_read_users(db=db, offset=offset, limit=limit)
+        users_count = (await conn.count_all(db=db, user_type=user_type))[0][0]
+        users_data = await conn.admin_read_users(db=db, offset=offset, limit=limit, user_type=user_type)
         for one in users_data:
             user = User(one)
             users_list.append(user.get_user_json())
     else:
-        users_data = await conn.read_all(table='all_users', db=db, order='user_id DESC')
+        users_data = await conn.admin_read_users(db=db, offset=0, limit=0, user_type=user_type,skip_limit=True)
         for one in users_data:
             if search not in (one['email']).lower() and search not in (one['name']).lower() \
                     and search not in str(one['phone']):

@@ -288,8 +288,13 @@ async def count_data(db: Depends, table: str, id_name: str, id_data):
 
 
 # получаем количество данных all
-async def count_all(db: Depends, table: str):
-    data = await db.fetch(f"SELECT COUNT(*) FROM {table};",)
+async def count_all(db: Depends, user_type: str):
+    user_type_sql = ''
+    if user_type == 'all_new':
+        user_type_sql = f" WHERE status='customer_checking' OR status='worker_checking'"
+    elif user_type != 'all':
+        user_type_sql = f" WHERE status='{user_type}'"
+    data = await db.fetch(f"SELECT COUNT(*) FROM all_users{user_type_sql};",)
     return data
 
 
@@ -313,8 +318,16 @@ async def get_orders_comment(db: Depends, order_id: int, user_to: int, admin: bo
 
 
 # получаем данные с одним фильтром
-async def admin_read_users(offset: int, limit: int, db: Depends,):
-    data = await db.fetch(f"SELECT * FROM all_users ORDER BY user_id DESC OFFSET $1 LIMIT $2;", offset, limit)
+async def admin_read_users(offset: int, limit: int, user_type: str, db: Depends, skip_limit: bool = False,):
+    user_type_sql = ''
+    if user_type == 'all_new':
+        user_type_sql = f" WHERE status='customer_checking' OR status='worker_checking'"
+    elif user_type != 'all':
+        user_type_sql = f" WHERE status='{user_type}'"
+    offset_sql = f' OFFSET {offset} LIMIT {limit}'
+    if skip_limit:
+        offset_sql = ''
+    data = await db.fetch(f"SELECT * FROM all_users{user_type_sql} ORDER BY user_id DESC{offset_sql};")
     return data
 
 
