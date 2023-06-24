@@ -277,7 +277,7 @@ async def read_data_order(db: Depends, user_id: int,):
 
 # получаем данные обзоров
 async def read_users_reviews(db: Depends, user_id: int,):
-    data = await db.fetch(f"SELECT * FROM orders WHERE worker_id=$1 AND review_text !='0' ORDER BY order_id DESC;",
+    data = await db.fetch(f"SELECT * FROM orders WHERE worker_id=$1 AND score !='0' ORDER BY order_id DESC;",
                           user_id, )
     return data
 
