@@ -400,6 +400,14 @@ async def read_job_app_msg(db: Depends, order_id: int, ):
 
 
 # получаем все новые сообщения для пользователя с id
+async def check_msg_job_app(db: Depends, order_id: int, user_id: int,):
+    data = await db.fetch(f"SELECT * FROM message_line "
+                          f"WHERE msg_id=$1 AND msg_type='job_application' AND from_id=$2 ORDER BY id DESC;",
+                          order_id, user_id)
+    return data
+
+
+# получаем все новые сообщения для пользователя с id
 async def read_all_msg_user(db: Depends, user_id: int, offset: int = 0, limit: int = 0, ):
     offset_limit = ''
 

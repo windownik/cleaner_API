@@ -480,6 +480,35 @@ async def user_get_reviews(user_id: int, access_token: str, db=Depends(data_b.co
                         headers={'content-type': 'application/json; charset=utf-8'})
 
 
+@app.get(path='/check_job_app', tags=['Orders'], responses=get_all_order_res)
+async def check_can_create_job_app(access_token: str, order_id: int, db=Depends(data_b.connection)):
+    """Check can create job application.\n
+    access_token: access token in our service"""
+
+    user_id = await conn.get_token(db=db, token_type='access', token=access_token)
+    if not user_id:
+        return Response(content="bad access token",
+                        status_code=_status.HTTP_401_UNAUTHORIZED)
+
+    order_data = await conn.read_data(db=db, name='*', table='orders', id_name='order_id', id_data=order_id)
+    if not order_data:
+        return JSONResponse(content={"ok": False,
+                                     'description': "Bad order_id"},
+                            status_code=_status.HTTP_400_BAD_REQUEST)
+
+    job_app = await conn.check_msg_job_app(db=db, order_id=order_id, user_id=user_id[0][0])
+
+    if not job_app:
+        return JSONResponse(content={"ok": True,
+                                     'desc': 'No job apps from this user'},
+                            status_code=_status.HTTP_200_OK,
+                            headers={'content-type': 'application/json; charset=utf-8'})
+
+    return JSONResponse(content={"ok": False,
+                                 'description': "Have job app in db"},
+                        status_code=_status.HTTP_400_BAD_REQUEST)
+
+
 @app.get(path='/all_orders', tags=['Orders'], responses=get_all_order_res)
 async def user_get_orders(access_token: str, db=Depends(data_b.connection)):
     """Get all users orders from dataBase.\n
