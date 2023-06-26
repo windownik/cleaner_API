@@ -112,7 +112,8 @@ async def create_sending_table(db):
  main_text TEXT DEFAULT '0',
  img_url TEXT DEFAULT '0',
  push_type TEXT DEFAULT 'text',
- status TEXT DEFAULT 'created'
+ status TEXT DEFAULT 'created',
+ msg_line_id INTEGER DEFAULT 0
  )''')
 
 
