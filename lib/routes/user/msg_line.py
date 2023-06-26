@@ -6,7 +6,7 @@ from fastapi import Depends
 from starlette.responses import Response, JSONResponse
 
 from lib import sql_connect as conn
-from lib.db_objects import Message, User
+from lib.db_objects import Message
 from lib.response_examples import *
 from lib.routes.push.push import send_push_notification
 from lib.sql_connect import data_b, app
@@ -78,7 +78,7 @@ async def create_new_messages(access_token: str, to_user_id: int, title: str, te
                             status_code=_status.HTTP_400_BAD_REQUEST)
     if push:
         await send_push_notification(access_token=access_token, user_id=to_user_id, title=title, push_body=text,
-                                     push_type='text_msg', db=db)
+                                     push_type='text_msg', msg_id=msg_id[0][0], db=db)
 
     return JSONResponse(content={"ok": True, 'desc': 'New message was created successfully.'},
                         status_code=_status.HTTP_200_OK,

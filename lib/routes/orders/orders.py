@@ -256,14 +256,14 @@ async def admin_confirm_ban_order(order_id: int, msg_id: int, status: str, acces
             text = f'Your order status has been updated\nComment\n{comment}'
 
     if push_token:
-        await conn.create_msg(msg_id=order.order_id, msg_type='order_comment', title=title,
-                              text=text,
-                              description=status,
-                              lang=lang[0][0], from_id=user_id[0][0], to_id=order.creator_id,
-                              user_type='user', db=db)
+        msg_id = await conn.create_msg(msg_id=order.order_id, msg_type='order_comment', title=title,
+                                       text=text,
+                                       description=status,
+                                       lang=lang[0][0], from_id=user_id[0][0], to_id=order.creator_id,
+                                       user_type='user', db=db)
         try:
             send_push(fcm_token=push_token[0][0], title=title, body=text, main_text=comment,
-                      push_type='moder_order_msg')
+                      push_type='moder_order_msg', msg_id=msg_id[0][0])
         except Exception as _ex:
             print(_ex)
 
@@ -315,14 +315,14 @@ async def user_pick_worker_for_order(order_id: int, user_id: int, access_token: 
         title = 'You have a new order'
         text = 'Congratulations you have chosen to work. Rather contact the customer.'
 
-    await conn.create_msg(msg_id=order_id, msg_type='order_you_worker', title=title,
-                          text=text,
-                          description='in_deal',
-                          lang=user_data[0]['lang'], from_id=creator_id[0][0], to_id=user_id,
-                          user_type='user', db=db)
+    msg_id = await conn.create_msg(msg_id=order_id, msg_type='order_you_worker', title=title,
+                                   text=text,
+                                   description='in_deal',
+                                   lang=user_data[0]['lang'], from_id=creator_id[0][0], to_id=user_id,
+                                   user_type='user', db=db)
     try:
         send_push(fcm_token=user_data[0]['push'], title=title, body=text, main_text='0',
-                  push_type='order_msg')
+                  push_type='order_msg', msg_id=msg_id[0][0])
     except Exception as _ex:
         print(_ex)
 
@@ -373,14 +373,14 @@ async def user_finish_order(order_id: int, access_token: str, db=Depends(data_b.
         title = 'Order closed successfully'
         text = 'Congratulations, you have successfully completed your order. We wish you good luck in your next works.'
 
-    await conn.create_msg(msg_id=order_id, msg_type='order_finish', title=title,
-                          text=text,
-                          description='finish',
-                          lang=user_data[0]['lang'], from_id=creator_id[0][0], to_id=user_id,
-                          user_type='user', db=db)
+    msg_id = await conn.create_msg(msg_id=order_id, msg_type='order_finish', title=title,
+                                   text=text,
+                                   description='finish',
+                                   lang=user_data[0]['lang'], from_id=creator_id[0][0], to_id=user_id,
+                                   user_type='user', db=db)
     try:
         send_push(fcm_token=user_data[0]['push'], title=title, body=text, main_text='0',
-                  push_type='order_msg')
+                  push_type='order_msg', msg_id=msg_id[0][0])
     except Exception as _ex:
         print(_ex)
 
@@ -436,14 +436,14 @@ async def user_pick_worker_for_order(order_id: int, review_text: str, review_sco
         text = review_text
         description = str(review_score)
 
-    await conn.create_msg(msg_id=order_id, msg_type='order_review', title=title,
-                          text=text,
-                          description=description,
-                          lang=user_data[0]['lang'], from_id=creator_id[0][0], to_id=user_id,
-                          user_type='review', db=db)
+    msg_id = await conn.create_msg(msg_id=order_id, msg_type='order_review', title=title,
+                                   text=text,
+                                   description=description,
+                                   lang=user_data[0]['lang'], from_id=creator_id[0][0], to_id=user_id,
+                                   user_type='review', db=db)
     try:
         send_push(fcm_token=user_data[0]['push'], title=title, body=text, main_text=str(review_score),
-                  push_type='order_msg')
+                  push_type='order_msg', msg_id=msg_id[0][0])
     except Exception as _ex:
         print(_ex)
 

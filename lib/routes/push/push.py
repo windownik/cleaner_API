@@ -24,7 +24,7 @@ async def initialization(connect):
 
 @app.get(path='/send_push', tags=['Push'], responses=send_push_res)
 async def send_push_notification(access_token: str, user_id: int, title: str, push_body: str, push_type: str,
-                                 main_text: str = '0', db=Depends(data_b.connection)):
+                                 main_text: str = '0', msg_id: int = 0, db=Depends(data_b.connection)):
     """
     Send push notifications
     user_id - id of user for sending push\n
@@ -40,7 +40,8 @@ async def send_push_notification(access_token: str, user_id: int, title: str, pu
     push_token = await conn.read_data(db=db, table='all_users', name='push', id_name='user_id', id_data=user_id)
     if not push_token:
         return Response(content="no user in database", status_code=_status.HTTP_400_BAD_REQUEST)
-    send_push(fcm_token=push_token[0][0], title=title, body=push_body, main_text=main_text, push_type=push_type)
+    send_push(fcm_token=push_token[0][0], title=title, body=push_body, main_text=main_text, push_type=push_type,
+              msg_id=msg_id)
     return JSONResponse(content={'ok': True, 'desc': 'successful send push'},
                         headers={'content-type': 'application/json; charset=utf-8'})
 
