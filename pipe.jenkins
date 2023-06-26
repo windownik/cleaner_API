@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage("step connect to server") {
             steps {
-                sh 'ssh root@185.51.247.27 \'cd cleaner/cleaner_API\''
+                sh 'ssh root@80.85.142.184 \'cd cleaner/cleaner_API\''
             }
         }
 
