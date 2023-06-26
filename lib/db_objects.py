@@ -112,7 +112,7 @@ class User:
                                           auth_type=self.auth_type, auth_id=self.auth_id, description=self.description,
                                           lang=self.lang, city=self.address.city, street=self.address.street,
                                           house=self.address.house, status=self.status, image_link=self.image_link,
-                                          latitudes=self.address.latitudes, longitudes=self.address.latitudes))[0][0]
+                                          latitudes=self.address.latitudes, longitudes=self.address.longitudes))[0][0]
 
 
 class Message:
