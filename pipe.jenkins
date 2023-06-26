@@ -14,6 +14,7 @@ pipeline {
             steps {
                 sh 'ssh root@80.85.142.184 \'cd cleaner/cleaner_API && docker-compose down\''
                 sh 'ssh root@80.85.142.184 \'cd cleaner/cleaner_API && docker system prune -a\''
+                sh 'ssh root@80.85.142.184 \'cd cleaner/cleaner_API && git pull\''
                 sh 'ssh root@80.85.142.184 \'cd cleaner/cleaner_API && docker compose up --build --no-color --wait\''
             }
         }
