@@ -257,7 +257,7 @@ async def msg_to_user(db: Depends, user_id: int, msg_type: str, title: str, shor
     now = datetime.datetime.now()
     data = await db.fetch(f"INSERT INTO message_line (msg_type, title, text, description, from_id, to_id, "
                           f"user_type, create_date) "
-                          f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING;", msg_type, title,
+                          f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING RETURNING id;", msg_type, title,
                           short_text, description, from_id, user_id, 'user', now)
     return data
 
