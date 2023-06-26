@@ -13,19 +13,9 @@ pipeline {
         stage("step connect to server") {
             steps {
                 sh 'ssh root@80.85.142.184 \'cd cleaner/cleaner_API\''
-            }
-        }
-
-        stage('Docker Down and delete') {
-          steps {
-            sh 'docker-compose down'
-            sh 'docker system prune'
-          }
-        }
-        stage('Rework Docker containers') {
-            steps {
+                sh 'docker-compose down'
+                sh 'docker system prune -a -y'
                 sh 'docker compose up --build --no-color --wait'
-                sh 'docker compose ps'
             }
         }
     }
