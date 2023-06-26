@@ -95,7 +95,7 @@ async def get_user_profession_list(access_token: str, user_id: int = 0, db=Depen
 @app.get(path='/object_list', tags=['Work'], responses=get_object_list_res)
 async def get_profession_list(db=Depends(data_b.connection)):
     """
-    Get all objects types list
+    Get all objects types list for all users
     """
     all_object = await conn.read_all(table='object_type', db=db, order='id')
     object_list = []
