@@ -108,13 +108,14 @@ async def start_sending_push_msg(access_token: str, lang: str, content_type: int
     elif url is not None:
         description = url
 
-    await conn.save_push_to_sending(db=db, users_id=users_id, title=title, short_text=short_text,
-                                    main_text=main_text if main_text is not None else '0',
-                                    push_type=push_type,
-                                    img_url=url if url is not None else '0')
+    for user in users_id:
+        msg_id = await conn.msg_to_user(db=db, user_id=user[0], title=title, short_text=short_text,
+                                        description=description, from_id=1, msg_type=push_type)
 
-    await conn.msg_to_many_users(db=db, users_id=users_id, title=title, short_text=short_text,
-                                 description=description, from_id=1, msg_type=push_type)
+        await conn.save_push_to_sending(db=db, user_id=user[0], title=title, short_text=short_text,
+                                        main_text=main_text if main_text is not None else '0',
+                                        push_type=push_type, msg_id=msg_id[0][0],
+                                        img_url=url if url is not None else '0')
 
     return JSONResponse(content={'ok': True, 'desc': 'successfully created'},
                         headers={'content-type': 'application/json; charset=utf-8'})

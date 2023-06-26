@@ -244,23 +244,22 @@ async def write_order(db: Depends, creator_id: int, city: str, street: str, hous
 
 
 # Создаем много новых записей в таблице рассылки
-async def save_push_to_sending(db: Depends, users_id: list, title: str, short_text: str, main_text: str, img_url: str,
-                               push_type: str):
-    for user_id in users_id:
-        sql = f"INSERT INTO sending (user_id, title, short_text, main_text, img_url, push_type) " \
-              f"VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING;"
-        await db.fetch(sql, user_id[0], title, short_text, main_text, img_url, push_type)
+async def save_push_to_sending(db: Depends, msg_id: str, user_id: int, title: str, short_text: str, main_text: str,
+                               img_url: str, push_type: str):
+    sql = f"INSERT INTO sending (user_id, title, short_text, main_text, img_url, push_type, msg_line_id) " \
+          f"VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING;"
+    await db.fetch(sql, user_id, title, short_text, main_text, img_url, push_type, msg_id)
 
 
 # Создаем много новых записей в таблице рассылки
-async def msg_to_many_users(db: Depends, users_id: list, msg_type: str, title: str, short_text: str, description: str,
-                            from_id: int):
+async def msg_to_user(db: Depends, user_id: int, msg_type: str, title: str, short_text: str, description: str,
+                      from_id: int):
     now = datetime.datetime.now()
-    for user_id in users_id:
-        await db.fetch(f"INSERT INTO message_line (msg_type, title, text, description, from_id, to_id, "
-                       f"user_type, create_date) "
-                       f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING;", msg_type, title, short_text,
-                       description, from_id, user_id[0], 'user', now)
+    data = await db.fetch(f"INSERT INTO message_line (msg_type, title, text, description, from_id, to_id, "
+                          f"user_type, create_date) "
+                          f"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING;", msg_type, title,
+                          short_text, description, from_id, user_id, 'user', now)
+    return data
 
 
 # получаем данные с одним фильтром
@@ -270,14 +269,14 @@ async def read_data(db: Depends, table: str, id_name: str, id_data, name: str = 
 
 
 # получаем данные с одним фильтром
-async def read_data_order(db: Depends, user_id: int,):
+async def read_data_order(db: Depends, user_id: int, ):
     data = await db.fetch(f"SELECT * FROM orders WHERE creator_id=$1 OR worker_id=$2 ORDER BY order_id DESC;",
                           user_id, user_id)
     return data
 
 
 # получаем данные обзоров
-async def read_users_reviews(db: Depends, user_id: int,):
+async def read_users_reviews(db: Depends, user_id: int, ):
     data = await db.fetch(f"SELECT * FROM orders WHERE worker_id=$1 AND score !='0' ORDER BY order_id DESC;",
                           user_id, )
     return data
@@ -296,12 +295,12 @@ async def count_all(db: Depends, user_type: str):
         user_type_sql = f" WHERE status='customer_checking' OR status='worker_checking'"
     elif user_type != 'all':
         user_type_sql = f" WHERE status='{user_type}'"
-    data = await db.fetch(f"SELECT COUNT(*) FROM all_users{user_type_sql};",)
+    data = await db.fetch(f"SELECT COUNT(*) FROM all_users{user_type_sql};", )
     return data
 
 
 # получаем данные с одним фильтром
-async def admin_read_orders(db: Depends,):
+async def admin_read_orders(db: Depends, ):
     data = await db.fetch(f"SELECT * FROM orders ORDER BY order_id DESC;", )
     return data
 
@@ -320,7 +319,7 @@ async def get_orders_comment(db: Depends, order_id: int, user_to: int, admin: bo
 
 
 # получаем данные с одним фильтром
-async def admin_read_users(offset: int, limit: int, user_type: str, db: Depends, skip_limit: bool = False,):
+async def admin_read_users(offset: int, limit: int, user_type: str, db: Depends, skip_limit: bool = False, ):
     user_type_sql = ''
     if user_type == 'all_new':
         user_type_sql = f" WHERE status='customer_checking' OR status='worker_checking'"
@@ -335,14 +334,14 @@ async def admin_read_users(offset: int, limit: int, user_type: str, db: Depends,
 
 
 # получаем данные с одним фильтром
-async def admin_search_users(search: str, offset: int, limit: int, db: Depends,):
+async def admin_search_users(search: str, offset: int, limit: int, db: Depends, ):
     data = await db.fetch(f"SELECT * FROM all_users WHERE email ILIKE $1 OR name ILIKE $2 OR phone ILIKE $3 "
                           f"ORDER BY user_id DESC OFFSET $4 LIMIT $5;", search, search, search, offset, limit)
     return data
 
 
 # получаем данные с одним фильтром
-async def admin_count_search_users(search: str,  db: Depends,):
+async def admin_count_search_users(search: str, db: Depends, ):
     data = await db.fetch(f"SELECT COUNT(*) FROM all_users WHERE email ILIKE $1 OR name ILIKE $2 OR phone ILIKE $3;",
                           search, search, search)
     return data
@@ -393,8 +392,7 @@ async def read_all_msg(db: Depends, user_id: int, offset: int = 0, limit: int = 
 
 
 # получаем все новые сообщения для пользователя с id
-async def read_job_app_msg(db: Depends, order_id: int,):
-
+async def read_job_app_msg(db: Depends, order_id: int, ):
     data = await db.fetch(f"SELECT * FROM message_line "
                           f"WHERE msg_id=$1 AND msg_type='job_application' "
                           f"AND (status='created' OR status='read') ORDER BY id DESC;", order_id)
